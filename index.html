@@ -203,7 +203,7 @@
 
     .hero-panel {
       position: relative;
-      padding: 25px;
+      padding: 20px 22px;
       border: 1px solid rgba(255,255,255,.12);
       border-radius: var(--radius-lg);
       background: rgba(255,255,255,.06);
@@ -222,10 +222,10 @@
 
     .metric {
       display: grid;
-      grid-template-columns: 42px 1fr auto;
-      gap: 12px;
+      grid-template-columns: 34px 1fr auto;
+      gap: 9px;
       align-items: center;
-      padding: 13px 0;
+      padding: 7px 0;
       border-top: 1px solid rgba(255,255,255,.1);
     }
     .metric:first-of-type { border-top: 0; }
@@ -233,22 +233,30 @@
     .metric-icon {
       display: grid;
       place-items: center;
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
       color: var(--navy-950);
-      font-size: .77rem;
+      font-size: .62rem;
       font-weight: 950;
       background: var(--type-orange);
     }
     .metric[data-map="pliometria"] .metric-icon { background: var(--type-orange); }
+    .metric[data-map="pliometria-superior"] .metric-icon { background: var(--type-orange); }
     .metric[data-map="potencia"] .metric-icon { color: var(--white); background: var(--type-red); }
     .metric[data-map="fuerza"] .metric-icon { background: var(--type-yellow); }
     .metric[data-map="isometrias"] .metric-icon { background: var(--type-white); box-shadow: inset 0 0 0 1px rgba(0,0,0,.22); }
     .metric[data-map="desaceleracion"] .metric-icon { color: var(--white); background: var(--type-green); }
+    .metric[data-map="aceleracion"] .metric-icon,
+    .metric[data-map="velocidad-maxima"] .metric-icon,
+    .metric[data-map="sprint-repetido"] .metric-icon { color: var(--white); background: var(--type-red); }
+    .metric[data-map="cambio-direccion"] .metric-icon,
+    .metric[data-map="agilidad-reactiva"] .metric-icon { color: var(--white); background: var(--type-green); }
+    .metric[data-map="core"] .metric-icon { background: var(--type-white); box-shadow: inset 0 0 0 1px rgba(0,0,0,.22); }
+    .metric[data-map="pie-tobillo"] .metric-icon { background: var(--type-yellow); }
     .metric-name { font-weight: 780; }
-    .metric-sub { color: rgba(255,255,255,.48); font-size: .72rem; }
-    .metric-value { color: rgba(255,255,255,.65); font-size: .8rem; font-weight: 800; }
+    .metric-sub { color: rgba(255,255,255,.48); font-size: .66rem; }
+    .metric-value { color: rgba(255,255,255,.65); font-size: .7rem; font-weight: 800; }
 
     .controls-wrap {
       position: relative;
@@ -501,10 +509,15 @@
     .exercise-card[data-goal="pliometria"],
     .exercise-card[data-goal="pliometria-superior"] { --type-color: var(--type-orange); }
     .exercise-card[data-goal="potencia"] { --type-color: var(--type-red); }
+    .exercise-card[data-goal="aceleracion"],
+    .exercise-card[data-goal="velocidad-maxima"],
+    .exercise-card[data-goal="sprint-repetido"] { --type-color: var(--type-red); }
     .exercise-card[data-goal="fuerza"],
     .exercise-card[data-goal="fuerza-maxima"],
     .exercise-card[data-goal="pie-tobillo"] { --type-color: var(--type-yellow); }
-    .exercise-card[data-goal="desaceleracion"] { --type-color: var(--type-green); }
+    .exercise-card[data-goal="desaceleracion"],
+    .exercise-card[data-goal="cambio-direccion"],
+    .exercise-card[data-goal="agilidad-reactiva"] { --type-color: var(--type-green); }
     .exercise-card[data-goal="isometrias"],
     .exercise-card[data-goal="core"] { --type-color: var(--type-white); }
     .exercise-card:hover {
@@ -512,6 +525,21 @@
       border-color: #c8b9aa;
       box-shadow: 0 16px 35px rgba(0,0,0,.10);
     }
+
+    .evidence-panel {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--type-orange);
+      border-radius: var(--radius-md);
+      background: var(--white);
+      box-shadow: 0 8px 25px rgba(0,0,0,.045);
+    }
+    .evidence-panel summary { cursor: pointer; font-weight: 900; }
+    .evidence-panel p { margin: 12px 0 8px; color: var(--muted); font-size: .84rem; }
+    .evidence-panel ol { margin: 0; padding-left: 20px; color: var(--muted); font-size: .76rem; line-height: 1.55; }
+    .evidence-panel li + li { margin-top: 7px; }
+    .evidence-panel a { color: #9b4300; font-weight: 800; }
 
     .card-top {
       display: flex;
@@ -538,10 +566,15 @@
     .goal-tag[data-goal="pliometria"],
     .goal-tag[data-goal="pliometria-superior"] { background: var(--type-orange); }
     .goal-tag[data-goal="potencia"] { color: var(--white); background: var(--type-red); }
+    .goal-tag[data-goal="aceleracion"],
+    .goal-tag[data-goal="velocidad-maxima"],
+    .goal-tag[data-goal="sprint-repetido"] { color: var(--white); background: var(--type-red); }
     .goal-tag[data-goal="fuerza"],
     .goal-tag[data-goal="fuerza-maxima"],
     .goal-tag[data-goal="pie-tobillo"] { background: var(--type-yellow); }
-    .goal-tag[data-goal="desaceleracion"] { color: var(--white); background: var(--type-green); }
+    .goal-tag[data-goal="desaceleracion"],
+    .goal-tag[data-goal="cambio-direccion"],
+    .goal-tag[data-goal="agilidad-reactiva"] { color: var(--white); background: var(--type-green); }
     .goal-tag[data-goal="isometrias"],
     .goal-tag[data-goal="core"] { background: var(--type-white); }
 
@@ -1395,10 +1428,15 @@
     .routine-row[data-goal="pliometria"],
     .routine-row[data-goal="pliometria-superior"] { --type-color: var(--type-orange); }
     .routine-row[data-goal="potencia"] { --type-color: var(--type-red); }
+    .routine-row[data-goal="aceleracion"],
+    .routine-row[data-goal="velocidad-maxima"],
+    .routine-row[data-goal="sprint-repetido"] { --type-color: var(--type-red); }
     .routine-row[data-goal="fuerza"],
     .routine-row[data-goal="fuerza-maxima"],
     .routine-row[data-goal="pie-tobillo"] { --type-color: var(--type-yellow); }
-    .routine-row[data-goal="desaceleracion"] { --type-color: var(--type-green); }
+    .routine-row[data-goal="desaceleracion"],
+    .routine-row[data-goal="cambio-direccion"],
+    .routine-row[data-goal="agilidad-reactiva"] { --type-color: var(--type-green); }
     .routine-row[data-goal="isometrias"],
     .routine-row[data-goal="core"] { --type-color: var(--type-white); }
     .routine-group-title + .routine-row { border-top: 0; }
@@ -1625,27 +1663,67 @@
         <div class="metric" data-map="pliometria">
           <span class="metric-icon">PJ</span>
           <div><div class="metric-name">Pliometría</div><div class="metric-sub">Rigidez · reactividad · aterrizaje</div></div>
-          <span class="metric-value">33 tareas</span>
+          <span class="metric-value">— tareas</span>
+        </div>
+        <div class="metric" data-map="pliometria-superior">
+          <span class="metric-icon">PS</span>
+          <div><div class="metric-name">Pliometría superior</div><div class="metric-sub">Recepción · rebote · lanzamiento</div></div>
+          <span class="metric-value">— tareas</span>
         </div>
         <div class="metric" data-map="potencia">
           <span class="metric-icon">PO</span>
           <div><div class="metric-name">Potencia</div><div class="metric-sub">Proyección · intención · velocidad</div></div>
-          <span class="metric-value">26 tareas</span>
+          <span class="metric-value">— tareas</span>
         </div>
         <div class="metric" data-map="fuerza">
           <span class="metric-icon">FZ</span>
           <div><div class="metric-name">Fuerza</div><div class="metric-sub">Base · unilateral · fuerza máxima</div></div>
-          <span class="metric-value">36 tareas</span>
+          <span class="metric-value">— tareas</span>
         </div>
         <div class="metric" data-map="isometrias">
           <span class="metric-icon">ISO</span>
           <div><div class="metric-name">Isometrías</div><div class="metric-sub">Empujar · sostener · absorber</div></div>
-          <span class="metric-value">20 tareas</span>
+          <span class="metric-value">— tareas</span>
         </div>
         <div class="metric" data-map="desaceleracion">
           <span class="metric-icon">DE</span>
           <div><div class="metric-name">Desaceleración</div><div class="metric-sub">Control · atenuación · dirección</div></div>
-          <span class="metric-value">21 tareas</span>
+          <span class="metric-value">— tareas</span>
+        </div>
+        <div class="metric" data-map="aceleracion">
+          <span class="metric-icon">AC</span>
+          <div><div class="metric-name">Aceleración</div><div class="metric-sub">Salida · fuerza horizontal · primeros pasos</div></div>
+          <span class="metric-value">— tareas</span>
+        </div>
+        <div class="metric" data-map="velocidad-maxima">
+          <span class="metric-icon">VM</span>
+          <div><div class="metric-name">Velocidad máxima</div><div class="metric-sub">Exposición · técnica · vuelo</div></div>
+          <span class="metric-value">— tareas</span>
+        </div>
+        <div class="metric" data-map="cambio-direccion">
+          <span class="metric-icon">COD</span>
+          <div><div class="metric-name">Cambio de dirección</div><div class="metric-sub">Frenar · orientar · reacelerar</div></div>
+          <span class="metric-value">— tareas</span>
+        </div>
+        <div class="metric" data-map="agilidad-reactiva">
+          <span class="metric-icon">AG</span>
+          <div><div class="metric-name">Agilidad reactiva</div><div class="metric-sub">Percibir · decidir · ejecutar</div></div>
+          <span class="metric-value">— tareas</span>
+        </div>
+        <div class="metric" data-map="sprint-repetido">
+          <span class="metric-icon">RSA</span>
+          <div><div class="metric-name">Sprint repetido</div><div class="metric-sub">Repetir · recuperar · sostener</div></div>
+          <span class="metric-value">— tareas</span>
+        </div>
+        <div class="metric" data-map="core">
+          <span class="metric-icon">CO</span>
+          <div><div class="metric-name">Core</div><div class="metric-sub">Antirrotación · transferencia · control</div></div>
+          <span class="metric-value">— tareas</span>
+        </div>
+        <div class="metric" data-map="pie-tobillo">
+          <span class="metric-icon">PT</span>
+          <div><div class="metric-name">Pie y tobillo</div><div class="metric-sub">Apoyo · sóleo · flexores plantares</div></div>
+          <span class="metric-value">— tareas</span>
         </div>
       </aside>
     </div>
@@ -1696,6 +1774,11 @@
           <option value="fuerza">Fuerza</option>
           <option value="isometrias">Isometrías</option>
           <option value="desaceleracion">Desaceleración</option>
+          <option value="aceleracion">Aceleración</option>
+          <option value="velocidad-maxima">Velocidad máxima</option>
+          <option value="cambio-direccion">Cambio de dirección</option>
+          <option value="agilidad-reactiva">Agilidad reactiva</option>
+          <option value="sprint-repetido">Sprint repetido</option>
           <option value="core">Core</option>
           <option value="pie-tobillo">Pie y tobillo</option>
         </select>
@@ -1714,6 +1797,18 @@
         <div class="result-count" id="resultCount" aria-live="polite"></div>
       </div>
       <div id="exerciseList"></div>
+      <details class="evidence-panel">
+        <summary>Base científica y criterio de la batería</summary>
+        <p>La selección prioriza exposiciones específicas de sprint, fuerza, pliometría, frenado, cambio de dirección y toma de decisión. Las dosis son puntos de partida editables y deben ajustarse al deporte, nivel, calendario y respuesta del deportista.</p>
+        <ol>
+          <li>McBurnie, A. J., Harper, D. J., Jones, P. A., &amp; Dos’Santos, T. (2022). Deceleration training in team sports: Another potential “vaccine” for sports-related injury? <em>Sports Medicine, 52</em>(1), 1–12. <a href="https://doi.org/10.1007/s40279-021-01583-x" target="_blank" rel="noopener">https://doi.org/10.1007/s40279-021-01583-x</a></li>
+          <li>Murphy, A., Burgess, K., Hall, A. J., Aspe, R. R., &amp; Swinton, P. A. (2023). The effects of strength and conditioning interventions on sprinting performance in team sport athletes: A systematic review and meta-analysis. <em>Journal of Strength and Conditioning Research, 37</em>(8), 1692–1702. <a href="https://doi.org/10.1519/JSC.0000000000004440" target="_blank" rel="noopener">https://doi.org/10.1519/JSC.0000000000004440</a></li>
+          <li>Myrvang, S., &amp; van den Tillaar, R. (2024). The longitudinal effects of resisted and assisted sprint training on sprint kinematics, acceleration, and maximum velocity: A systematic review and meta-analysis. <em>Sports Medicine - Open, 10</em>, 110. <a href="https://doi.org/10.1186/s40798-024-00777-7" target="_blank" rel="noopener">https://doi.org/10.1186/s40798-024-00777-7</a></li>
+          <li>Dos’Santos, T., Thomas, C., Comfort, P., &amp; Jones, P. A. (2019). The effect of training interventions on change of direction biomechanics associated with increased anterior cruciate ligament loading: A scoping review. <em>Sports Medicine, 49</em>(12), 1837–1859. <a href="https://doi.org/10.1007/s40279-019-01171-0" target="_blank" rel="noopener">https://doi.org/10.1007/s40279-019-01171-0</a></li>
+          <li>Ramirez-Campillo, R., Sortwell, A., Moran, J., Afonso, J., Clemente, F. M., Lloyd, R. S., Oliver, J. L., Pedley, J., &amp; Granacher, U. (2023). Plyometric-jump training effects on physical fitness and sport-specific performance according to maturity: A systematic review with meta-analysis. <em>Sports Medicine - Open, 9</em>, 23. <a href="https://doi.org/10.1186/s40798-023-00568-6" target="_blank" rel="noopener">https://doi.org/10.1186/s40798-023-00568-6</a></li>
+          <li>Thurlow, F., Huynh, M., Townshend, A., McLaren, S. J., James, L. P., Taylor, J. M., Weston, M., &amp; Weakley, J. (2024). The effects of repeated-sprint training on physical fitness and physiological adaptation in athletes: A systematic review and meta-analysis. <em>Sports Medicine, 54</em>, 953–974. <a href="https://doi.org/10.1007/s40279-023-01959-1" target="_blank" rel="noopener">https://doi.org/10.1007/s40279-023-01959-1</a></li>
+        </ol>
+      </details>
     </section>
 
   </main>
@@ -2021,7 +2116,7 @@
   </section>
 
   <footer class="footer">
-    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual.</span>
+    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.22.2</span>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -2645,6 +2740,11 @@
       'fuerza-maxima': ['Priorizar técnica estable y repeticiones limpias.', 'Trabajar habitualmente con 1–3 repeticiones en reserva, sin llegar al fallo.', 'Separar del campo intenso cuando la fuerza máxima sea la prioridad.'],
       isometrias: ['Definir el ángulo y la intención antes de iniciar.', 'Mantener respiración y alineación durante toda la contracción.', 'En ISO-CATCH, estabilizar sin colapsar y reducir la demanda si se pierde la posición.'],
       desaceleracion: ['Bajar el centro de masas antes del último apoyo.', 'Distribuir la frenada en varios pasos.', 'Progresar velocidad, ángulo o incertidumbre de una en una.'],
+      aceleracion: ['Proyectar el cuerpo y empujar el suelo hacia atrás.', 'Mantener contactos activos detrás del centro de masas en los primeros pasos.', 'Recuperar por completo para repetir la máxima intención.'],
+      'velocidad-maxima': ['Llegar progresivamente a la zona rápida, sin acelerar de golpe.', 'Mantener postura alta, pelvis estable y contactos breves bajo el cuerpo.', 'Finalizar la repetición si aparece tensión o se deteriora la mecánica.'],
+      'cambio-direccion': ['Frenar antes de orientar el apoyo de corte.', 'Recolocar cadera y tronco hacia la nueva trayectoria.', 'Salir del corte sin pasos de ajuste innecesarios.'],
+      'agilidad-reactiva': ['Leer la señal antes de iniciar la respuesta.', 'Priorizar una decisión eficaz sin perder la mecánica de frenado.', 'Variar el estímulo y limitar la anticipación del deportista.'],
+      'sprint-repetido': ['Cada repetición debe seguir siendo un sprint real.', 'Mantener distancia y recuperación constantes para comparar el rendimiento.', 'Detener el bloque si la caída de rendimiento supera el criterio previsto.'],
       core: ['Controlar costillas y pelvis sin contener la respiración.', 'Evitar compensaciones lumbares.', 'Priorizar tensión útil sobre duración excesiva.'],
       'pie-tobillo': ['Mantener apoyo estable y recorrido controlado.', 'Diferenciar trabajo de rodilla flexionada y extendida.', 'Progresar volumen antes que complejidad.']
     };
@@ -2657,6 +2757,11 @@
       'fuerza-maxima': 'Añadir 2,5–5% cuando se complete el rango previsto con técnica estable y margen de esfuerzo.',
       isometrias: 'Progresar primero tiempo o intención, después carga o velocidad de entrada; cambiar el ángulo solo con un objetivo claro.',
       desaceleracion: 'Aumentar la velocidad de entrada antes de reducir espacio o añadir decisión.',
+      aceleracion: 'Progresar la distancia o la resistencia sin alterar de forma excesiva la mecánica de salida.',
+      'velocidad-maxima': 'Aumentar primero la exposición a velocidad alta y después la distancia de vuelo, manteniendo técnica y relajación.',
+      'cambio-direccion': 'Aumentar velocidad de entrada, severidad del ángulo o longitud de salida de una en una.',
+      'agilidad-reactiva': 'Pasar de una señal simple a varias opciones y después a un oponente real manteniendo calidad de movimiento.',
+      'sprint-repetido': 'Progresar repeticiones o reducir recuperación solo cuando la pérdida de velocidad permanezca dentro del objetivo.',
       core: 'Reducir apoyos o añadir carga manteniendo respiración y control lumbopélvico.',
       'pie-tobillo': 'Aumentar rango, carga o unilateralidad según tolerancia.'
     };
@@ -2669,6 +2774,11 @@
       'fuerza-maxima': 'En deportistas entrenados, descansos superiores a 2 minutos favorecen la expresión y la ganancia máxima de fuerza.',
       isometrias: 'ISO-HOLD submáximo: 60–120 s. ISO-PUSH máximo e ISO-CATCH intenso: 2–3 min para preservar fuerza, intención y control.',
       desaceleracion: 'Recupera lo suficiente para repetir una entrada rápida y una frenada técnicamente estable.',
+      aceleracion: 'Usa 2–4 min según distancia y resistencia para conservar la calidad de los primeros pasos.',
+      'velocidad-maxima': 'Usa recuperación amplia, normalmente 4–6 min, para repetir exposiciones realmente rápidas.',
+      'cambio-direccion': 'Recupera 2–3 min cuando la prioridad sea la velocidad y la calidad del corte.',
+      'agilidad-reactiva': 'Usa esfuerzos breves y pausas amplias; la fatiga no debe convertir la decisión en una respuesta lenta.',
+      'sprint-repetido': 'La recuperación incompleta forma parte del estímulo; estandarízala y controla la caída de rendimiento.',
       core: 'Pausa suficiente para mantener control respiratorio y lumbopélvico.',
       'pie-tobillo': 'Ajusta la pausa para completar el rango sin compensaciones ni pérdida de control.'
     };
@@ -2716,9 +2826,17 @@
       ex('single-leg-pogo', 'intermedio', 'pliometria', 'Pogo unilateral', 'Desarrollar rigidez reactiva del tobillo sobre un solo apoyo.', '3', '8–10/lado', '90–120 s'),
       ex('scissor-pogo', 'base', 'pliometria', 'Scissor Pogo', 'Alternar apoyos rápidos manteniendo una postura alta y elástica.', '3', '10–12 contactos', '60–90 s'),
       ex('box-jump-stick', 'base', 'pliometria', 'Box Jump + stick', 'Desarrollar impulso vertical con una recepción elevada y estable.', '3', '3–5', '90–120 s'),
+      ex('vertical-hop-stick', 'base', 'pliometria', 'Hop vertical unilateral + stick', 'Producir impulso vertical sobre un apoyo y estabilizar la recepción.', '3', '3–4/lado', '90–120 s'),
+      ex('diagonal-bound-stick', 'intermedio', 'pliometria', 'Bound diagonal + stick', 'Combinar proyección frontal y lateral con una recepción unipodal estable.', '3', '3–4/lado', '90–120 s'),
+      ex('crossover-bound-stick', 'intermedio', 'pliometria', 'Crossover Bound + stick', 'Producir impulso lateral cruzado y controlar pelvis y tronco al recibir.', '3', '3/lado', '90–120 s'),
+      ex('lateral-box-drop-stick', 'intermedio', 'pliometria', 'Drop lateral desde cajón + stick', 'Exponer a una recepción lateral desde una altura baja antes de tareas reactivas.', '3', '3/lado', '90–120 s'),
+      ex('vertical-to-broad-jump', 'intermedio', 'pliometria', 'Salto vertical → Broad Jump', 'Reorientar rápidamente una acción vertical hacia una proyección horizontal.', '3', '2 secuencias', '2 min'),
+      ex('depth-jump-sprint', 'avanzado', 'pliometria', 'Depth Jump → sprint 5 m', 'Transformar una recepción reactiva en una aceleración corta.', '4', '2–3', '2–3 min'),
+      ex('hurdle-hop-sprint', 'avanzado', 'pliometria', 'Hurdle Hop → sprint 5 m', 'Enlazar un contacto reactivo bilateral con proyección horizontal.', '4', '2–3', '2–3 min'),
+      ex('medial-lateral-hop-series', 'avanzado', 'pliometria', 'Hop medial–lateral unilateral', 'Encadenar contactos rápidos en el plano frontal sobre un solo apoyo.', '3', '4+4/lado', '2 min'),
 
       ex('incline-plyo-push-up', 'base', 'pliometria-superior', 'Flexión pliométrica inclinada', 'Introducir un empuje balístico con menor carga relativa y recepción controlada.', '3', '4–6', '90–120 s'),
-      ex('kneeling-mb-chest-pass', 'base', 'pliometria-superior', 'Chest Pass arrodillado con balón medicinal', 'Aislar la producción rápida del tren superior sin impulso de piernas.', '3–4', '4–6', '90–120 s'),
+      ex('kneeling-mb-chest-pass', 'base', 'potencia', 'Chest Pass arrodillado con balón medicinal', 'Aislar la producción rápida del tren superior sin impulso de piernas.', '3–4', '4–6', '90–120 s'),
       ex('supine-mb-chest-throw', 'base', 'pliometria-superior', 'Lanzamiento de pecho supino', 'Desarrollar empuje explosivo con una recepción simple del balón.', '3–4', '4–6', '90–120 s'),
       ex('plyo-push-up', 'intermedio', 'pliometria-superior', 'Flexión pliométrica', 'Producir suficiente impulso para despegar las manos manteniendo un tronco estable.', '3–4', '3–5', '2 min'),
       ex('drop-push-up-stick', 'intermedio', 'pliometria-superior', 'Drop Push-Up + stick', 'Aprender a absorber rápidamente una caída corta con los brazos.', '3', '3–5', '90–120 s'),
@@ -2728,6 +2846,11 @@
       ex('depth-push-up', 'avanzado', 'pliometria-superior', 'Depth Push-Up desde cajones bajos', 'Elevar la demanda excéntrica y reactiva del empuje horizontal.', '3', '3–4', '2–3 min'),
       ex('lateral-plyo-push-up', 'avanzado', 'pliometria-superior', 'Flexión pliométrica lateral alterna', 'Producir y absorber fuerza lateral con el tren superior.', '3', '3–4/lado', '2–3 min'),
       ex('mb-overhead-rebound', 'intermedio', 'pliometria-superior', 'Rebote overhead con balón medicinal', 'Recibir y relanzar por encima de la cabeza con una transición corta.', '3–4', '4–6', '90–120 s'),
+      ex('standing-step-chest-pass', 'base', 'potencia', 'Chest Pass con paso', 'Integrar un paso corto con un lanzamiento horizontal explosivo.', '3–4', '4/lado', '90–120 s'),
+      ex('split-stance-reactive-pass', 'intermedio', 'pliometria-superior', 'Chest Pass reactivo en split stance', 'Recibir y relanzar manteniendo una base asimétrica específica.', '3–4', '4–5/lado', '90–120 s'),
+      ex('step-behind-rotational-throw', 'intermedio', 'potencia', 'Lanzamiento rotacional con step-behind', 'Usar el paso cruzado para cargar y liberar potencia rotacional.', '4', '3–4/lado', '2 min'),
+      ex('single-arm-wall-pass', 'intermedio', 'pliometria-superior', 'Pase unilateral reactivo contra pared', 'Desarrollar recepción y empuje rápidos con un brazo.', '3', '4–6/lado', '90–120 s'),
+      ex('plyo-push-up-to-box', 'avanzado', 'pliometria-superior', 'Flexión pliométrica a cajones bajos', 'Producir suficiente impulso para elevar las manos y recibir sobre una superficie estable.', '3–4', '3–4', '2–3 min'),
 
       ex('mb-scoop', 'base', 'potencia', 'Med Ball Scoop Toss', 'Expresar potencia de cadera con bajo coste de aterrizaje.', '3–4', '4–6', '90–120 s'),
       ex('mb-overhead', 'base', 'potencia', 'Med Ball Overhead Throw', 'Coordinar extensión global y lanzamiento explosivo.', '3–4', '4–6', '90–120 s'),
@@ -2754,7 +2877,43 @@
       ex('sled-push-power', 'intermedio', 'potencia', 'Sled Push potente', 'Aplicar fuerza horizontal con intención máxima durante una distancia corta.', '4–5', '10 m', '2 min'),
       ex('mb-shotput-rotational', 'base', 'potencia', 'Med Ball Rotational Shot Put', 'Proyectar el balón desde el hombro integrando apoyo, cadera y tronco.', '4', '4/lado', '90–120 s'),
       ex('loaded-jump-lunge', 'avanzado', 'potencia', 'Jump Lunge con carga ligera', 'Desarrollar potencia unilateral alterna manteniendo una recepción controlada.', '4', '3/lado', '2–3 min'),
-      ex('band-resisted-acceleration', 'avanzado', 'potencia', 'Aceleración resistida con banda', 'Producir impulso horizontal en los primeros pasos de aceleración.', '5', '8–10 m', '2–3 min'),
+      ex('clean-pull', 'intermedio', 'potencia', 'Clean Pull', 'Desarrollar triple extensión explosiva sin demanda de recepción.', '4', '3–4', '2–3 min'),
+      ex('mid-thigh-clean-pull', 'intermedio', 'potencia', 'Clean Pull desde muslo', 'Concentrar la producción rápida de fuerza en el final de la extensión.', '4–5', '3', '2–3 min'),
+      ex('split-jerk', 'avanzado', 'potencia', 'Split Jerk', 'Transmitir fuerza vertical y recibir la carga en una base dividida estable.', '4', '2–3', '3 min'),
+      ex('single-leg-jump-squat', 'avanzado', 'potencia', 'Jump Squat unilateral con carga ligera', 'Expresar potencia unilateral con una carga que permita despegar con control.', '4', '3/lado', '2–3 min'),
+      ex('step-behind-scoop-toss', 'intermedio', 'potencia', 'Scoop Toss con step-behind', 'Generar potencia horizontal y rotacional mediante una entrada dinámica.', '4', '3–4/lado', '2 min'),
+      ex('backward-overhead-throw', 'base', 'potencia', 'Lanzamiento overhead hacia atrás', 'Expresar extensión global proyectando el balón por detrás del cuerpo.', '4', '4', '90–120 s'),
+      ex('slam-to-sprint', 'intermedio', 'potencia', 'Med Ball Slam → sprint 5 m', 'Enlazar una acción explosiva del tren superior con una salida corta.', '4', '3–4', '2–3 min'),
+      ex('cable-rotational-punch-power', 'intermedio', 'potencia', 'Puñetazo rotacional explosivo en polea', 'Acelerar una resistencia ligera coordinando apoyo, cadera y tronco.', '4', '4/lado', '90–120 s'),
+
+      ex('wall-march', 'base', 'aceleracion', 'Wall Drill March', 'Aprender alineación proyectada y alternancia de cadera en la salida.', '3', '5–6/lado', '60–90 s'),
+      ex('wall-switch-single', 'base', 'aceleracion', 'Wall Drill Switch simple', 'Cambiar rápidamente la pierna de ataque manteniendo la proyección corporal.', '3', '4–5/lado', '60–90 s'),
+      ex('wall-switch-continuous', 'intermedio', 'aceleracion', 'Wall Drill Switch continuo', 'Encadenar intercambios rápidos sin perder rigidez del tronco ni apoyo activo.', '3', '5–6 s', '90 s'),
+      ex('falling-start-10m', 'base', 'aceleracion', 'Falling Start 10 m', 'Usar la caída del cuerpo para iniciar una aceleración sin paso previo.', '4–6', '10 m', '2–3 min'),
+      ex('split-stance-start-10m', 'base', 'aceleracion', 'Salida split stance 10 m', 'Practicar una salida reproducible desde una base asimétrica.', '4–6', '10 m', '2–3 min'),
+      ex('three-point-start-10m', 'intermedio', 'aceleracion', 'Salida de tres apoyos 10 m', 'Aumentar la proyección horizontal desde una posición baja.', '4–6', '10 m', '2–3 min'),
+      ex('push-up-start-10m', 'intermedio', 'aceleracion', 'Salida desde prono 10 m', 'Resolver una salida desde el suelo y acelerar con pasos eficaces.', '4–5', '10 m', '2–3 min'),
+      ex('lateral-crossover-start', 'intermedio', 'aceleracion', 'Salida lateral con crossover 10 m', 'Transformar una posición lateral en aceleración frontal.', '4', '10 m/lado', '2–3 min'),
+      ex('drop-step-acceleration', 'intermedio', 'aceleracion', 'Drop Step → aceleración 10 m', 'Abrir la cadera y acelerar hacia atrás-lateral sin pasos de ajuste.', '4', '10 m/lado', '2–3 min'),
+      ex('backpedal-turn-acceleration', 'intermedio', 'aceleracion', 'Backpedal → giro → sprint 10 m', 'Reorientar el cuerpo desde desplazamiento posterior hacia aceleración máxima.', '4', '10 m', '2–3 min'),
+      ex('sled-sprint-light', 'intermedio', 'aceleracion', 'Sprint con trineo ligero', 'Sobrecargar ligeramente la aceleración conservando una mecánica cercana al sprint libre.', '4–6', '15–20 m', '2–3 min'),
+      ex('sled-sprint-moderate', 'avanzado', 'aceleracion', 'Sprint con trineo moderado', 'Aumentar la demanda de fuerza horizontal durante los primeros pasos.', '4–6', '10–15 m', '3 min'),
+      ex('heavy-sled-march', 'base', 'aceleracion', 'Marcha pesada con trineo', 'Practicar proyección y extensión coordinada a baja velocidad.', '4', '10–15 m', '2 min'),
+      ex('hill-sprint-15m', 'intermedio', 'aceleracion', 'Sprint en cuesta 15 m', 'Facilitar la proyección corporal y elevar la demanda propulsiva.', '4–6', '12–15 m', '2–3 min'),
+      ex('band-resisted-acceleration', 'avanzado', 'aceleracion', 'Aceleración resistida con banda', 'Producir impulso horizontal en los primeros pasos de aceleración.', '5', '8–10 m', '2–3 min'),
+      ex('band-release-acceleration', 'avanzado', 'aceleracion', 'Aceleración con liberación de banda', 'Pasar de resistencia inicial a sprint libre sin perder orientación del impulso.', '4–5', '10–15 m', '3 min'),
+      ex('curved-acceleration-15m', 'intermedio', 'aceleracion', 'Aceleración curva 15 m', 'Acelerar sobre una trayectoria curvilínea controlando inclinación y apoyos.', '4', '15 m/lado', '2–3 min'),
+
+      ex('ankling-drill', 'base', 'velocidad-maxima', 'Ankling / dribble bajo', 'Preparar contactos breves bajo la cadera con baja amplitud.', '3', '15–20 m', '60–90 s'),
+      ex('dribble-run-high', 'intermedio', 'velocidad-maxima', 'Dribble run alto', 'Elevar progresivamente la amplitud manteniendo el apoyo debajo del cuerpo.', '3', '20 m', '90 s'),
+      ex('a-run', 'base', 'velocidad-maxima', 'A-Run', 'Coordinar ataque del suelo, postura alta y acción alterna de cadera.', '3', '20 m', '90 s'),
+      ex('wicket-run', 'intermedio', 'velocidad-maxima', 'Wicket Run', 'Organizar frecuencia, longitud de paso y apoyo bajo el centro de masas.', '4', '20–30 m', '3–4 min'),
+      ex('build-up-fly-10', 'intermedio', 'velocidad-maxima', 'Build-up 20 m + Fly 10 m', 'Alcanzar velocidad alta de forma progresiva y sostenerla en una zona breve.', '4–6', '20+10 m', '4–5 min'),
+      ex('build-up-fly-20', 'avanzado', 'velocidad-maxima', 'Build-up 25 m + Fly 20 m', 'Aumentar la exposición a velocidad máxima con una zona lanzada más larga.', '4–5', '25+20 m', '5–6 min'),
+      ex('sprint-float-sprint', 'avanzado', 'velocidad-maxima', 'Sprint–float–sprint', 'Alternar velocidad alta y relajación sin perder postura ni ritmo.', '3–4', '20+20+20 m', '5–6 min'),
+      ex('ins-and-outs', 'avanzado', 'velocidad-maxima', 'Ins & Outs 60 m', 'Practicar cambios sutiles de intensidad manteniendo mecánica de velocidad.', '3–4', '60 m', '5–6 min'),
+      ex('progressive-sprint-40m', 'intermedio', 'velocidad-maxima', 'Sprint progresivo 40 m', 'Construir velocidad de forma gradual hasta una exposición alta controlada.', '4', '40 m', '4–5 min'),
+      ex('assisted-sprint-light', 'avanzado', 'velocidad-maxima', 'Sprint asistido ligero', 'Exponer a una velocidad supramáxima pequeña sin alterar la técnica.', '3–4', '20–30 m', '5–6 min', 'Utilizar solo con deportistas técnicamente preparados y reducir la asistencia si cambia la postura, el apoyo o el control.'),
 
       ex('trap-bar-deadlift', 'intermedio', 'fuerza', 'Trap Bar Deadlift', 'Desarrollar fuerza global con énfasis en extensores de cadera y rodilla.', '3–5', '3–5', '2–3 min'),
       ex('front-squat', 'intermedio', 'fuerza', 'Sentadilla frontal', 'Desarrollar fuerza de tren inferior con tronco relativamente vertical.', '3–4', '4–6', '2–3 min'),
@@ -2767,7 +2926,6 @@
       ex('nordic-hamstring', 'avanzado', 'fuerza', 'Nordic Hamstring', 'Exponer a los isquiosurales a alta demanda excéntrica de rodilla.', '3', '3–6', '2 min'),
       ex('reverse-nordic', 'intermedio', 'fuerza', 'Reverse Nordic', 'Desarrollar tolerancia de cuádriceps en longitudes amplias.', '3', '5–8', '90 s'),
       ex('lateral-lunge', 'base', 'fuerza', 'Lateral Lunge', 'Desarrollar fuerza y control en el plano frontal.', '3', '6/lado', '90 s'),
-      ex('split-squat-iso', 'base', 'fuerza', 'Split Squat Isométrico', 'Construir capacidad posicional unilateral con baja complejidad.', '3', '20–30 s/lado', '60–75 s'),
       ex('safety-bar-squat', 'intermedio', 'fuerza', 'Safety Bar Squat', 'Desarrollar fuerza bilateral con una distribución anterior y estable de la carga.', '4', '4–6', '2–3 min'),
       ex('barbell-step-up', 'intermedio', 'fuerza', 'Step-Up con barra', 'Desarrollar fuerza unilateral desde un apoyo elevado sin impulso de la pierna libre.', '4', '4/pierna', '2 min'),
       ex('slider-leg-curl', 'base', 'fuerza', 'Curl femoral con deslizadores', 'Fortalecer isquiosurales combinando extensión de cadera y flexión de rodilla.', '3', '6–10', '90–120 s'),
@@ -2782,6 +2940,22 @@
       ex('landmine-reverse-lunge', 'intermedio', 'fuerza', 'Landmine Reverse Lunge', 'Desarrollar fuerza unilateral con carga anterior y control de la desaceleración.', '3–4', '5–8/lado', '90–120 s'),
       ex('landmine-lateral-lunge', 'intermedio', 'fuerza', 'Landmine Lateral Lunge', 'Desarrollar fuerza en el plano frontal con una referencia de carga guiada.', '3–4', '5–6/lado', '90–120 s'),
       ex('landmine-single-leg-rdl', 'intermedio', 'fuerza', 'Landmine RDL unilateral', 'Desarrollar fuerza posterior unilateral manteniendo pelvis y apoyo estables.', '3–4', '5–8/lado', '90–120 s'),
+      ex('conventional-deadlift', 'intermedio', 'fuerza', 'Peso muerto convencional', 'Desarrollar fuerza global de bisagra y capacidad de aplicar fuerza contra el suelo.', '3–5', '3–6', '2–3 min'),
+      ex('barbell-reverse-lunge', 'intermedio', 'fuerza', 'Zancada inversa con barra', 'Construir fuerza unilateral con control excéntrico y apoyo estable.', '3–4', '5–8/lado', '2 min'),
+      ex('front-foot-elevated-split-squat', 'intermedio', 'fuerza', 'Split Squat con pie delantero elevado', 'Aumentar el rango de cadera y rodilla en un patrón unilateral estable.', '3–4', '5–8/lado', '90–120 s'),
+      ex('single-leg-box-squat', 'intermedio', 'fuerza', 'Sentadilla unilateral a cajón', 'Desarrollar fuerza unipodal y controlar la profundidad con una referencia externa.', '3–4', '4–6/lado', '2 min'),
+      ex('cossack-squat', 'intermedio', 'fuerza', 'Cossack Squat', 'Desarrollar fuerza y movilidad activa en el plano frontal.', '3', '5–6/lado', '90–120 s'),
+      ex('high-step-up', 'intermedio', 'fuerza', 'Step-Up alto', 'Aumentar la demanda de extensión unilateral con poca ayuda de la pierna posterior.', '3–4', '5–6/lado', '2 min'),
+      ex('lateral-step-down', 'base', 'fuerza', 'Step-Down lateral', 'Controlar excéntricamente cadera y rodilla en apoyo unilateral.', '3', '6–8/lado', '90 s'),
+      ex('belt-squat', 'base', 'fuerza', 'Belt Squat', 'Desarrollar fuerza de piernas reduciendo la carga axial sobre el tronco.', '3–4', '5–8', '2 min'),
+      ex('back-extension-45', 'base', 'fuerza', 'Extensión de cadera a 45°', 'Fortalecer extensores de cadera manteniendo una pelvis controlada.', '3–4', '6–10', '90–120 s'),
+      ex('razor-curl', 'avanzado', 'fuerza', 'Razor Curl', 'Entrenar isquiosurales combinando extensión de cadera y flexión de rodilla.', '3', '4–6', '2 min'),
+      ex('single-leg-slider-curl', 'intermedio', 'fuerza', 'Curl femoral unilateral con deslizador', 'Aumentar la demanda excéntrica de isquiosurales sobre un solo apoyo.', '3', '5–8/lado', '90–120 s'),
+      ex('dynamic-copenhagen', 'intermedio', 'fuerza', 'Copenhagen dinámico', 'Desarrollar fuerza de aductores mediante elevaciones controladas de pelvis.', '3', '6–10/lado', '90 s'),
+      ex('adductor-slider-lunge', 'intermedio', 'fuerza', 'Zancada lateral con deslizador', 'Cargar los aductores en longitud durante un desplazamiento lateral controlado.', '3', '6–8/lado', '90–120 s'),
+      ex('bench-press', 'base', 'fuerza', 'Press banca', 'Desarrollar fuerza de empuje horizontal con una base estable.', '3–4', '5–8', '2 min'),
+      ex('pull-up', 'intermedio', 'fuerza', 'Dominada', 'Desarrollar fuerza relativa de tracción vertical y control escapular.', '3–4', '4–8', '2 min'),
+      ex('single-arm-cable-row', 'base', 'fuerza', 'Remo unilateral en polea', 'Desarrollar tracción unilateral resistiendo la rotación del tronco.', '3–4', '6–10/lado', '90 s'),
 
       ex('back-squat-max', 'intermedio', 'fuerza', 'Back Squat pesado', 'Desarrollar fuerza máxima bilateral con un patrón estable y específico.', '4–5', '2–4 @ 85–92%', '3–5 min'),
       ex('trap-bar-deadlift-max', 'intermedio', 'fuerza', 'Trap Bar Deadlift pesado', 'Elevar la producción máxima de fuerza con una posición de carga centrada.', '4–5', '2–4 @ 85–92%', '3–5 min'),
@@ -2790,7 +2964,6 @@
       ex('weighted-chin-up-max', 'avanzado', 'fuerza', 'Dominada lastrada', 'Desarrollar fuerza máxima de tracción relativa y absoluta.', '4', '3–5', '3–4 min'),
       ex('hip-thrust-max', 'intermedio', 'fuerza', 'Hip Thrust pesado', 'Elevar la fuerza máxima de extensión de cadera.', '4', '3–5 @ 82–90%', '3 min'),
       ex('rfess-max', 'avanzado', 'fuerza', 'RFESS pesada', 'Desarrollar fuerza máxima unilateral con control pélvico.', '4', '3–5/pierna', '2–3 min'),
-      ex('isometric-mid-thigh-pull', 'avanzado', 'fuerza', 'Isometric Mid-Thigh Pull', 'Producir fuerza isométrica máxima desde una posición de tirón estable.', '4–5', '3–5 s', '2–3 min'),
       ex('standing-calf-max', 'intermedio', 'fuerza', 'Elevación de gemelo pesada', 'Desarrollar fuerza máxima de flexión plantar con rodilla extendida.', '4', '4–6', '2–3 min'),
       ex('seated-soleus-max', 'intermedio', 'fuerza', 'Sóleo sentado pesado', 'Desarrollar fuerza alta de flexión plantar con rodilla flexionada.', '4', '5–8', '2 min'),
 
@@ -2814,6 +2987,13 @@
       ex('iso-push-lateral-lunge', 'intermedio', 'isometrias', 'ISO-PUSH · Lateral Lunge contra pines', 'Aplicar fuerza lateral máxima desde un ángulo estable de cadera y rodilla.', '4', '3–5 s/lado', '2 min'),
       ex('iso-push-bench-pins', 'avanzado', 'isometrias', 'ISO-PUSH · Press banca contra pines', 'Aplicar fuerza máxima de empuje en un ángulo específico del press.', '4', '3–5 s', '2–3 min'),
       ex('iso-catch-medball-overhead', 'avanzado', 'isometrias', 'ISO-CATCH · Balón medicinal overhead', 'Recibir una perturbación sobre la cabeza y estabilizar hombros y tronco.', '3', '3–5', '2 min'),
+      ex('iso-hold-split-squat-deep', 'intermedio', 'isometrias', 'ISO-HOLD · Split Squat profundo', 'Sostener una posición unilateral larga para aumentar la demanda local y posicional.', '3', '20–35 s/lado', '90 s'),
+      ex('iso-hold-copenhagen-long', 'intermedio', 'isometrias', 'ISO-HOLD · Copenhagen largo', 'Aumentar la demanda isométrica de aductores mediante una palanca larga.', '3', '15–25 s/lado', '90 s'),
+      ex('iso-hold-long-lever-bridge', 'intermedio', 'isometrias', 'ISO-HOLD · Puente femoral palanca larga', 'Cargar isquiosurales manteniendo la extensión de cadera con rodillas poco flexionadas.', '3', '20–30 s', '90 s'),
+      ex('iso-hold-single-leg-hip-lock', 'base', 'isometrias', 'ISO-HOLD · Hip Lock unipodal', 'Mantener pelvis y cadera de ataque estables sobre un solo apoyo.', '3', '20–30 s/lado', '60–90 s'),
+      ex('iso-push-calf-pins', 'intermedio', 'isometrias', 'ISO-PUSH · Gemelo contra pines', 'Aplicar intención máxima de flexión plantar en un ángulo específico.', '4', '3–5 s/lado', '2 min'),
+      ex('iso-catch-forward-lunge', 'intermedio', 'isometrias', 'ISO-CATCH · Zancada frontal', 'Recibir el cuerpo en una zancada y detener el avance sin pasos adicionales.', '3', '3–4/lado', '90–120 s'),
+      ex('iso-catch-lateral-lunge', 'intermedio', 'isometrias', 'ISO-CATCH · Zancada lateral', 'Absorber una entrada lateral y fijar cadera, rodilla y pie.', '3', '3–4/lado', '90–120 s'),
 
       ex('drop-step-stop', 'base', 'desaceleracion', 'Drop Step → Stop', 'Aprender postura de frenado con poco momentum.', '3', '4/lado', '45–60 s'),
       ex('run-5-stop', 'base', 'desaceleracion', 'Carrera 5 m → frenada en zona', 'Relacionar velocidad de entrada y espacio de frenado.', '3', '3–4', '60 s'),
@@ -2822,31 +3002,83 @@
       ex('sprint-10-stop', 'intermedio', 'desaceleracion', 'Sprint 10 m → parada', 'Distribuir la frenada tras una aceleración moderada.', '4', '2–3', '90–120 s'),
       ex('lateral-run-stop', 'intermedio', 'desaceleracion', 'Carrera lateral → stop', 'Frenar desde velocidad lateral y estabilizar.', '3–4', '3/lado', '90 s'),
       ex('crossover-stop', 'intermedio', 'desaceleracion', 'Crossover Run → stop', 'Controlar la frenada tras desplazamiento cruzado.', '3–4', '3/lado', '90 s'),
-      ex('cut-45', 'intermedio', 'desaceleracion', 'Entrada → corte 45°', 'Integrar frenada y reorientación con ángulo moderado.', '3–4', '3/lado', '90 s'),
-      ex('cut-90', 'intermedio', 'desaceleracion', 'Entrada → corte 90°', 'Aumentar demanda de frenado y reorientación lateral.', '4', '2–3/lado', '90–120 s'),
+      ex('cut-45', 'intermedio', 'cambio-direccion', 'Entrada → corte 45°', 'Integrar frenada y reorientación con ángulo moderado.', '3–4', '3/lado', '90 s'),
+      ex('cut-90', 'intermedio', 'cambio-direccion', 'Entrada → corte 90°', 'Aumentar demanda de frenado y reorientación lateral.', '4', '2–3/lado', '90–120 s'),
       ex('sprint-15-stop', 'avanzado', 'desaceleracion', 'Sprint 15 m → stop corto', 'Tolerar alta velocidad con espacio de frenado limitado.', '4', '2–3', '2 min'),
-      ex('cut-135', 'avanzado', 'desaceleracion', 'Entrada → corte 135°', 'Frenar con un cambio direccional severo.', '4', '2/lado', '2 min'),
-      ex('turn-180', 'avanzado', 'desaceleracion', 'Sprint → giro 180°', 'Frenar y re-acelerar en dirección opuesta.', '4', '2/lado', '2–3 min'),
-      ex('reactive-stop', 'avanzado', 'desaceleracion', 'Frenada reactiva por señal', 'Resolver una parada con información tardía.', '4–5', '2–3', '2 min'),
-      ex('mirror-brake', 'avanzado', 'desaceleracion', 'Mirror Drill: aceleración–frenada', 'Adaptar frenadas y re-aceleraciones a un oponente.', '4', '8–12 s', '90–120 s'),
+      ex('cut-135', 'avanzado', 'cambio-direccion', 'Entrada → corte 135°', 'Frenar con un cambio direccional severo.', '4', '2/lado', '2 min'),
+      ex('turn-180', 'avanzado', 'cambio-direccion', 'Sprint → giro 180°', 'Frenar y re-acelerar en dirección opuesta.', '4', '2/lado', '2–3 min'),
+      ex('reactive-stop', 'avanzado', 'agilidad-reactiva', 'Frenada reactiva por señal', 'Resolver una parada con información tardía.', '4–5', '2–3', '2 min'),
+      ex('mirror-brake', 'avanzado', 'agilidad-reactiva', 'Mirror Drill: aceleración–frenada', 'Adaptar frenadas y re-aceleraciones a un oponente.', '4', '8–12 s', '90–120 s'),
       ex('sprint-20-progressive-stop', 'avanzado', 'desaceleracion', 'Sprint 20 m → frenada progresiva', 'Distribuir una frenada de alta velocidad sobre una distancia planificada.', '4', '2', '2–3 min'),
       ex('curved-run-stop', 'intermedio', 'desaceleracion', 'Carrera curva → stop', 'Controlar la frenada después de una entrada curvilínea.', '4', '3/lado', '90–120 s'),
-      ex('shuffle-cut-90', 'intermedio', 'desaceleracion', 'Shuffle → corte 90°', 'Frenar desde un desplazamiento lateral y reorientar la salida.', '4', '3/lado', '90–120 s'),
+      ex('shuffle-cut-90', 'intermedio', 'cambio-direccion', 'Shuffle → corte 90°', 'Frenar desde un desplazamiento lateral y reorientar la salida.', '4', '3/lado', '90–120 s'),
       ex('aerial-reception-stop', 'intermedio', 'desaceleracion', 'Recepción aérea → estabilización', 'Absorber una caída bilateral y quedar preparado para una acción posterior.', '3', '3–4', '90–120 s'),
-      ex('reactive-three-cone-stop', 'avanzado', 'desaceleracion', 'Frenada reactiva de 3 conos', 'Elegir y ejecutar una frenada ante una señal espacial tardía.', '4', '3', '2 min'),
+      ex('reactive-three-cone-stop', 'avanzado', 'agilidad-reactiva', 'Frenada reactiva de 3 conos', 'Elegir y ejecutar una frenada ante una señal espacial tardía.', '4', '3', '2 min'),
+      ex('sprint-10-single-leg-stop', 'intermedio', 'desaceleracion', 'Sprint 10 m → frenada unipodal asistida', 'Introducir una mayor contribución unilateral con velocidad de entrada controlada.', '3–4', '2/lado', '2 min'),
+      ex('sprint-to-split-stance-stop', 'intermedio', 'desaceleracion', 'Sprint → parada en split stance', 'Frenar terminando en una base asimétrica preparada para una nueva acción.', '4', '2–3/lado', '90–120 s'),
+      ex('lateral-bound-two-step-stop', 'intermedio', 'desaceleracion', 'Lateral Bound → frenada en dos apoyos', 'Conectar una proyección lateral con una desaceleración distribuida.', '3–4', '3/lado', '90–120 s'),
+      ex('backpedal-forward-stop', 'intermedio', 'desaceleracion', 'Backpedal → avance → stop', 'Gestionar una transición posterior-anterior antes de frenar.', '4', '3', '90–120 s'),
+      ex('diagonal-entry-stop', 'intermedio', 'desaceleracion', 'Entrada diagonal → parada', 'Controlar una frenada con componente frontal y lateral.', '4', '3/lado', '90–120 s'),
+      ex('high-speed-split-stop', 'avanzado', 'desaceleracion', 'Entrada rápida → split stop', 'Tolerar una frenada intensa terminando en una posición específica de juego.', '4', '2/lado', '2–3 min'),
+      ex('closeout-deceleration', 'intermedio', 'desaceleracion', 'Closeout → frenada corta', 'Acelerar hacia un oponente y reducir velocidad manteniendo capacidad de reacción.', '4', '3', '90–120 s'),
+      ex('curved-to-lateral-stop', 'avanzado', 'desaceleracion', 'Carrera curva → parada lateral', 'Frenar una trayectoria curva y terminar orientado hacia el centro del campo.', '4', '2–3/lado', '2 min'),
+
+      ex('modified-505', 'intermedio', 'cambio-direccion', '505 modificado · entrada 5 m', 'Practicar un giro de 180° con una aproximación corta y controlable.', '4', '2/lado', '2 min'),
+      ex('full-505', 'avanzado', 'cambio-direccion', '505 completo', 'Integrar aceleración, entrada rápida, giro de 180° y reaceleración.', '4', '2/lado', '2–3 min'),
+      ex('pro-agility-5-10-5', 'avanzado', 'cambio-direccion', 'Pro Agility 5–10–5', 'Encadenar dos cambios de 180° en ambas direcciones.', '3–4', '1/lado', '3 min'),
+      ex('y-cut-planned', 'intermedio', 'cambio-direccion', 'Y-Cut preplanificado', 'Reorientar la carrera hacia una salida diagonal conocida.', '4', '3/lado', '2 min'),
+      ex('zig-zag-three-cut', 'intermedio', 'cambio-direccion', 'Zig-zag de 3 cortes', 'Encadenar varios cambios moderados conservando ritmo y orientación.', '3–4', '1 recorrido/lado', '2–3 min'),
+      ex('l-drill', 'avanzado', 'cambio-direccion', 'L-Drill / 3 conos', 'Combinar giros cerrados, curva y reaceleración en un recorrido corto.', '3–4', '1/lado', '3 min'),
+      ex('shuffle-crossover-exit', 'intermedio', 'cambio-direccion', 'Shuffle → crossover → salida', 'Cambiar de desplazamiento lateral a aceleración frontal sin pasos sobrantes.', '4', '3/lado', '90–120 s'),
+      ex('curved-run-cut', 'avanzado', 'cambio-direccion', 'Carrera curva → corte exterior', 'Reorientar una trayectoria curva mediante un apoyo exterior eficaz.', '4', '2–3/lado', '2–3 min'),
+      ex('jab-step-reacceleration', 'intermedio', 'cambio-direccion', 'Jab Step → reaceleración', 'Usar un apoyo corto de engaño para cambiar la dirección de salida.', '4', '3/lado', '90–120 s'),
+      ex('multi-angle-cut-series', 'avanzado', 'cambio-direccion', 'Serie de cortes 45°–90°–135°', 'Comparar y entrenar distintos ángulos de corte dentro del mismo recorrido.', '3', '1 recorrido/lado', '3 min'),
+
+      ex('reactive-y-cut', 'intermedio', 'agilidad-reactiva', 'Y-Cut reactivo por color', 'Seleccionar una salida diagonal a partir de una señal visual tardía.', '4–6', '1', '90–120 s'),
+      ex('reactive-gate-choice', 'intermedio', 'agilidad-reactiva', 'Elección reactiva de puertas', 'Acelerar hacia una de varias puertas según una señal externa.', '4–6', '1', '90–120 s'),
+      ex('ball-drop-chase', 'base', 'agilidad-reactiva', 'Ball Drop Chase', 'Reaccionar a la caída del balón y acelerar para interceptarlo.', '4–6', '1/lado', '90 s'),
+      ex('partner-point-three-cone', 'intermedio', 'agilidad-reactiva', '3 conos por señal del compañero', 'Responder a una indicación espacial con salida, frenada y retorno.', '4', '3 señales', '2 min'),
+      ex('one-v-one-gate', 'avanzado', 'agilidad-reactiva', '1v1 · defender dos puertas', 'Resolver información real del oponente en un espacio y tiempo limitados.', '4–6', '6–10 s', '2 min'),
+      ex('shadow-chase', 'avanzado', 'agilidad-reactiva', 'Shadow Chase', 'Imitar aceleraciones y cortes de un líder manteniendo una distancia objetivo.', '4', '8–12 s', '2 min'),
+      ex('reactive-505', 'avanzado', 'agilidad-reactiva', '505 reactivo', 'Elegir el lado de giro de 180° después de iniciar la aproximación.', '4', '2', '2–3 min'),
+      ex('rolling-ball-intercept', 'intermedio', 'agilidad-reactiva', 'Intercepción de balón rodado', 'Ajustar trayectoria y velocidad para interceptar un objeto móvil.', '4–6', '1/lado', '90–120 s'),
+      ex('auditory-turn-sprint', 'base', 'agilidad-reactiva', 'Giro y sprint por señal sonora', 'Reaccionar a una señal auditiva seleccionando una dirección de salida.', '4–6', '1', '90 s'),
+      ex('reactive-closeout-duel', 'avanzado', 'agilidad-reactiva', 'Closeout reactivo 1v1', 'Cerrar espacio y responder al primer movimiento del atacante.', '4–6', '6–8 s', '2 min'),
+
+      ex('rsa-straight-20m', 'intermedio', 'sprint-repetido', 'RSA lineal · 6 × 20 m', 'Repetir sprints lineales con recuperación incompleta estandarizada.', '2–3', '6 × 20 m · pausa 20 s', '3 min entre bloques'),
+      ex('rsa-shuttle-15-15', 'intermedio', 'sprint-repetido', 'RSA shuttle · 15 + 15 m', 'Combinar sprint repetido con una frenada y giro de 180°.', '2–3', '5 × 30 m · pausa 25 s', '3–4 min entre bloques'),
+      ex('rsa-10-10', 'base', 'sprint-repetido', 'RSA corto · 10 + 10 m', 'Introducir esfuerzos repetidos con aceleración, giro y reaceleración.', '2–3', '5 × 20 m · pausa 25 s', '3 min entre bloques'),
+      ex('rsa-curved-20m', 'intermedio', 'sprint-repetido', 'RSA curvo · 6 × 20 m', 'Repetir sprints sobre trayectorias curvas alternando ambos lados.', '2–3', '6 × 20 m · pausa 20–25 s', '3–4 min entre bloques'),
+      ex('rsa-variable-starts', 'intermedio', 'sprint-repetido', 'RSA con salidas variables', 'Repetir aceleraciones desde posiciones de inicio distintas.', '2–3', '6 × 15 m · pausa 20 s', '3 min entre bloques'),
+      ex('rsa-multidirectional-5-5-5', 'avanzado', 'sprint-repetido', 'RSA multidireccional · 5+5+5 m', 'Sostener aceleración y cambios de dirección bajo recuperación incompleta.', '2–3', '5 repeticiones · pausa 30 s', '4 min entre bloques'),
+      ex('repeated-acceleration-cluster', 'intermedio', 'sprint-repetido', 'Clúster de aceleraciones · 3 × 10 m', 'Agrupar aceleraciones muy cortas con pausas breves y recuperación amplia entre clústeres.', '4', '3 × 10 m · pausa 10 s', '2–3 min entre clústeres'),
 
       ex('pallof-press', 'base', 'core', 'Pallof Press', 'Entrenar resistencia a la rotación con postura estable.', '3', '8/lado', '45–60 s'),
       ex('dead-bug', 'base', 'core', 'Dead Bug', 'Coordinar respiración y control lumbopélvico con movimiento de extremidades.', '3', '8/lado', '45 s'),
       ex('side-plank', 'base', 'core', 'Side Plank', 'Desarrollar resistencia lateral del tronco.', '3', '25–30 s/lado', '45–60 s'),
-      ex('copenhagen', 'intermedio', 'core', 'Copenhagen', 'Integrar aductores y control lateral del tronco.', '3', '15–20 s/lado', '60 s'),
       ex('suitcase-carry', 'base', 'core', 'Suitcase Carry', 'Resistir inclinación lateral durante la marcha.', '3', '20–30 m/lado', '60 s'),
       ex('half-kneeling-chop', 'intermedio', 'core', 'Half-Kneeling Cable Chop', 'Controlar rotación y transferencia diagonal.', '3', '6–8/lado', '60 s'),
       ex('bear-plank-drag', 'intermedio', 'core', 'Bear Plank Drag', 'Resistir rotación con apoyos reducidos.', '3', '6/lado', '60 s'),
+      ex('dead-bug-pulldown', 'intermedio', 'core', 'Dead Bug con pulldown', 'Añadir una tracción de brazos mientras se controla la extensión lumbopélvica.', '3', '6–8/lado', '60 s'),
+      ex('front-plank-row', 'intermedio', 'core', 'Plank Row en polea', 'Resistir rotación durante una tracción unilateral desde plancha.', '3', '6–8/lado', '60–75 s'),
+      ex('ab-wheel-rollout', 'intermedio', 'core', 'Ab Wheel Rollout', 'Entrenar anti-extensión mediante una palanca progresivamente larga.', '3', '6–10', '60–90 s'),
+      ex('landmine-antirotation', 'intermedio', 'core', 'Landmine Antirrotation', 'Controlar el arco de la barra evitando rotación excesiva de pelvis y tronco.', '3', '6–8/lado', '60–90 s'),
+      ex('half-kneeling-cable-lift', 'intermedio', 'core', 'Half-Kneeling Cable Lift', 'Transferir fuerza en diagonal ascendente manteniendo la pelvis estable.', '3', '6–8/lado', '60 s'),
+      ex('front-rack-carry', 'base', 'core', 'Front Rack Carry', 'Sostener carga anterior durante la marcha sin perder posición costal y pélvica.', '3', '20–30 m', '60–90 s'),
+      ex('offset-front-rack-march', 'intermedio', 'core', 'Marcha front rack unilateral', 'Resistir inclinación y rotación mientras se alterna el apoyo.', '3', '10–12 pasos/lado', '60–90 s'),
+      ex('pallof-overhead', 'intermedio', 'core', 'Pallof Press overhead', 'Aumentar la palanca de anti-rotación llevando los brazos sobre la cabeza.', '3', '6–8/lado', '60–75 s'),
 
       ex('soleus-raise', 'base', 'pie-tobillo', 'Soleus Raise', 'Fortalecer flexores plantares con rodilla flexionada.', '3', '10–12', '60 s'),
       ex('tibialis-raise', 'base', 'pie-tobillo', 'Tibialis Raise', 'Desarrollar dorsiflexores y tolerancia anterior de pierna.', '3', '12–15', '45–60 s'),
       ex('standing-calf-raise', 'base', 'pie-tobillo', 'Standing Calf Raise', 'Fortalecer flexores plantares con rodilla extendida.', '3–4', '8–12', '60–75 s'),
-      ex('calf-isometric', 'base', 'pie-tobillo', 'Isométrico de gemelo', 'Desarrollar capacidad isométrica en una posición específica.', '3', '25–40 s/lado', '60 s')
+      ex('single-leg-calf-raise', 'base', 'pie-tobillo', 'Elevación de gemelo unilateral', 'Desarrollar fuerza de flexión plantar y control del apoyo sobre una pierna.', '3–4', '8–12/lado', '60–75 s'),
+      ex('single-leg-soleus-raise', 'intermedio', 'pie-tobillo', 'Sóleo unilateral sentado', 'Aumentar la fuerza del sóleo con rodilla flexionada sobre un solo lado.', '3–4', '8–12/lado', '60–75 s'),
+      ex('calf-raise-leg-press', 'intermedio', 'pie-tobillo', 'Gemelo en prensa', 'Cargar la flexión plantar con rodilla extendida y apoyo estable.', '3–4', '6–10', '90 s'),
+      ex('loaded-dorsiflexion', 'base', 'pie-tobillo', 'Dorsiflexión cargada de rodilla', 'Mejorar fuerza y control activo al avanzar la tibia sobre el pie.', '3', '8–12/lado', '60 s'),
+      ex('band-ankle-inversion', 'base', 'pie-tobillo', 'Inversión de tobillo con banda', 'Fortalecer inversores controlando el movimiento del retropié.', '3', '12–15/lado', '45–60 s'),
+      ex('band-ankle-eversion', 'base', 'pie-tobillo', 'Eversión de tobillo con banda', 'Fortalecer eversores y control lateral del tobillo.', '3', '12–15/lado', '45–60 s'),
+      ex('short-foot', 'base', 'pie-tobillo', 'Short Foot', 'Mejorar control activo del arco sin flexionar los dedos.', '3', '8–10 × 5 s/lado', '45 s'),
+      ex('toe-yoga', 'base', 'pie-tobillo', 'Toe Yoga', 'Disociar primer dedo y dedos laterales para mejorar control del antepié.', '2–3', '8–10/lado', '30–45 s')
     ];
 
     const executionDefaults = {
@@ -2892,6 +3124,36 @@
         control: 'Termina equilibrado, con pie, rodilla y cadera alineados y capacidad para volver a acelerar.',
         avoid: 'Evita llegar erguido, clavar un único apoyo rígido o cruzar el pie delante del cuerpo.'
       },
+      aceleracion: {
+        setup: 'Define la posición de salida, la distancia y una calle libre; inclina el cuerpo como una unidad.',
+        action: 'Empuja el suelo hacia atrás y acelera con pasos potentes que aumenten progresivamente de longitud.',
+        control: 'Mantén cabeza, tronco y pelvis alineados y conserva la máxima intención hasta completar la distancia.',
+        avoid: 'No te levantes de golpe, no alcances el suelo con el pie por delante ni repitas con fatiga evidente.'
+      },
+      'velocidad-maxima': {
+        setup: 'Usa una zona de aceleración suficiente y llega relajado a la zona de máxima velocidad.',
+        action: 'Corre alto, ataca el suelo debajo de la cadera y deja que los brazos acompañen con ritmo.',
+        control: 'Mantén pelvis estable, contactos breves y relajación de cara, hombros y manos.',
+        avoid: 'No fuerces una zancada excesiva, no talonees por delante del cuerpo ni hagas velocidad máxima fatigado.'
+      },
+      'cambio-direccion': {
+        setup: 'Marca la entrada, el apoyo de corte, el ángulo y la distancia de salida antes de comenzar.',
+        action: 'Frena antes del corte, orienta cadera y pie y vuelve a empujar el suelo en la nueva dirección.',
+        control: 'Sal equilibrado, con el tronco orientado y sin pasos correctivos innecesarios.',
+        avoid: 'No plantes la pierna rígida lejos del cuerpo ni gires solo desde la rodilla.'
+      },
+      'agilidad-reactiva': {
+        setup: 'Conoce las reglas, pero no la respuesta; fija una señal clara y un espacio seguro.',
+        action: 'Percibe primero, decide y ejecuta la aceleración, frenada o corte que resuelva la tarea.',
+        control: 'Mantén una respuesta eficaz y técnicamente estable sin anticipar sistemáticamente la señal.',
+        avoid: 'No conviertas la tarea en un patrón memorizado ni añadas tantas opciones que desaparezca la intensidad.'
+      },
+      'sprint-repetido': {
+        setup: 'Estandariza distancia, salida, pausa y recorrido antes de iniciar el bloque.',
+        action: 'Completa cada repetición con intención máxima y utiliza la recuperación indicada sin alargarla.',
+        control: 'Registra tiempos cuando sea posible y detén el bloque al superar la caída de rendimiento prevista.',
+        avoid: 'No llames sprint a repeticiones submáximas ni sacrifiques mecánica por completar volumen.'
+      },
       core: {
         setup: 'Alinea costillas y pelvis, crea tensión abdominal y mantén una respiración fluida.',
         action: 'Mueve las extremidades o la carga sin permitir que el tronco rote, se incline o se extienda.',
@@ -2920,7 +3182,7 @@
       { goal: 'pliometria', match: /single-leg-pogo|scissor-pogo/, setup: 'Coloca el apoyo bajo la cadera, tronco alto y tobillo activo antes del primer contacto.', action: 'Encadena rebotes cortos desde el tobillo manteniendo el ritmo y la dirección prevista.', control: 'Conserva altura, tiempo de apoyo y control pélvico durante toda la serie.', avoid: 'No permitas que el pie colapse, que la cadera caiga o que el contacto se vuelva largo.' },
       { goal: 'pliometria', match: /mb-overhead-rebound/, setup: 'Sitúate estable, con balón ligero, costillas controladas y espacio seguro sobre la cabeza.', action: 'Recibe el balón con codos suaves y devuélvelo arriba con una transición rápida y coordinada.', control: 'Mantén una trayectoria vertical, estable y sin perder la posición del tronco.', avoid: 'No bloquees los codos, arquees la zona lumbar ni uses un balón demasiado pesado.' },
       { goal: 'pliometria-superior', match: /incline-plyo-push-up/, setup: 'Apoya las manos sobre un banco estable, algo más abiertas que los hombros, y forma una línea cabeza–talones.', action: 'Desciende de forma breve y empuja hasta separar claramente las manos del banco.', control: 'Recibe con codos suaves y vuelve a estabilizar antes de repetir.', avoid: 'No acerques el pecho con la cabeza adelantada ni pierdas la posición de la pelvis.' },
-      { goal: 'pliometria-superior', match: /kneeling-mb-chest-pass/, setup: 'Arrodíllate con glúteos y abdomen activos, sosteniendo el balón delante del pecho.', action: 'Lanza al frente extendiendo los brazos con máxima velocidad sin impulsar la cadera.', control: 'La trayectoria debe ser recta y la distancia similar en todos los lanzamientos.', avoid: 'Evita arquear la espalda o balancear el tronco para generar impulso.' },
+      { goal: 'potencia', match: /kneeling-mb-chest-pass/, setup: 'Arrodíllate con glúteos y abdomen activos, sosteniendo el balón delante del pecho.', action: 'Lanza al frente extendiendo los brazos con máxima velocidad sin impulsar la cadera.', control: 'La trayectoria debe ser recta y la distancia similar en todos los lanzamientos.', avoid: 'Evita arquear la espalda o balancear el tronco para generar impulso.' },
       { goal: 'pliometria-superior', match: /supine-mb-chest-throw/, setup: 'Túmbate estable con rodillas flexionadas y recibe el balón sobre el centro del pecho.', action: 'Amortigua con codos flexionados y devuelve el balón verticalmente con un empuje rápido.', control: 'Haz que el balón suba recto y vuelve a recibirlo con los antebrazos alineados.', avoid: 'No bloquees los codos ni permitas que el balón descienda hacia la cara.' },
       { goal: 'pliometria-superior', match: /plyo-push-up|clap-push-up|depth-push-up|drop-push-up/, setup: 'Coloca manos bajo los hombros, cuerpo en bloque y superficie de recepción estable.', action: 'Absorbe con codos flexionados y cambia rápidamente a un empuje que despegue las manos.', control: 'Mantén la misma altura y una recepción suave durante toda la serie.', avoid: 'No sacrifiques la posición del tronco para conseguir más vuelo o una palmada.' },
       { goal: 'pliometria-superior', match: /reactive-wall-chest-pass/, setup: 'Sitúate a una distancia que permita recibir el balón delante del pecho sin perder postura.', action: 'Recibe con codos suaves y devuélvelo a la pared con la menor transición posible.', control: 'Mantén ritmo, punto de impacto y velocidad constantes.', avoid: 'No dejes que el balón llegue al cuerpo ni separes los codos en exceso.' },
@@ -2966,15 +3228,15 @@
       { goal: 'isometrias', match: /iso-hold/, setup: 'Adopta el ángulo indicado y alcanza la tensión objetivo antes de iniciar el cronómetro.', action: 'Sostén la carga o el peso corporal sin modificar la posición.', control: 'Respira con normalidad y termina cuando ya no puedas conservar el ángulo.', avoid: 'No descanses sobre estructuras pasivas ni acortes el rango a mitad de la serie.' },
       { goal: 'isometrias', match: /iso-push/, setup: 'Colócate contra una resistencia completamente inmóvil y elimina cualquier holgura.', action: 'Aumenta la fuerza durante 1 segundo y empuja con intención máxima durante 3–5 segundos.', control: 'Mantén el ángulo y la dirección de fuerza sin temblores compensatorios.', avoid: 'No golpees la resistencia ni contengas la respiración durante todo el esfuerzo.' },
       { goal: 'isometrias', match: /iso-catch/, setup: 'Define la posición final que debes alcanzar y utiliza una velocidad de entrada controlable.', action: 'Recibe la carga o el cuerpo y crea tensión inmediatamente para detener el movimiento.', control: 'Fija la posición 2 segundos sin pasos, rebotes ni pérdida de alineación.', avoid: 'No aumentes altura, velocidad o carga si necesitas movimientos correctivos.' },
-      { goal: 'desaceleracion', match: /cut-45|cut-90|cut-135/, setup: 'Marca el punto de entrada, el pie de corte y la nueva dirección antes de comenzar.', action: 'Reduce velocidad antes del apoyo final, planta el pie fuera del centro de masas y reorienta la cadera.', control: 'Sal del corte equilibrado y acelera en la nueva dirección sin pasos de ajuste.', avoid: 'No llegues demasiado rápido, apoyes con la pierna rígida ni gires solo desde la rodilla.' },
-      { goal: 'desaceleracion', match: /turn-180/, setup: 'Acelera hacia la marca con el cuerpo preparado para bajar antes de girar.', action: 'Frena en varios apoyos, coloca el pie de giro estable y orienta cadera y hombros hacia la salida.', control: 'Vuelve a acelerar sin pausa y sin cruzar los pies.', avoid: 'No realices todo el frenado sobre un único apoyo alejado del cuerpo.' },
-      { goal: 'desaceleracion', match: /reactive-stop|mirror-brake/, setup: 'Mantén una postura preparada y dirige la mirada a la señal o al centro de masas del compañero.', action: 'Responde bajando el centro de masas y ajusta los pasos antes de frenar o cambiar de dirección.', control: 'Conserva distancia, equilibrio y capacidad para responder a la siguiente acción.', avoid: 'No adivines la señal ni cruces los pies cuando la dirección todavía es incierta.' },
+      { goal: 'cambio-direccion', match: /cut-45|cut-90|cut-135/, setup: 'Marca el punto de entrada, el pie de corte y la nueva dirección antes de comenzar.', action: 'Reduce velocidad antes del apoyo final, planta el pie fuera del centro de masas y reorienta la cadera.', control: 'Sal del corte equilibrado y acelera en la nueva dirección sin pasos de ajuste.', avoid: 'No llegues demasiado rápido, apoyes con la pierna rígida ni gires solo desde la rodilla.' },
+      { goal: 'cambio-direccion', match: /turn-180/, setup: 'Acelera hacia la marca con el cuerpo preparado para bajar antes de girar.', action: 'Frena en varios apoyos, coloca el pie de giro estable y orienta cadera y hombros hacia la salida.', control: 'Vuelve a acelerar sin pausa y sin cruzar los pies.', avoid: 'No realices todo el frenado sobre un único apoyo alejado del cuerpo.' },
+      { goal: 'agilidad-reactiva', match: /reactive-stop|mirror-brake/, setup: 'Mantén una postura preparada y dirige la mirada a la señal o al centro de masas del compañero.', action: 'Responde bajando el centro de masas y ajusta los pasos antes de frenar o cambiar de dirección.', control: 'Conserva distancia, equilibrio y capacidad para responder a la siguiente acción.', avoid: 'No adivines la señal ni cruces los pies cuando la dirección todavía es incierta.' },
       { goal: 'desaceleracion', match: /shuffle|lateral-run|crossover/, setup: 'Orienta cadera y pies según el desplazamiento lateral y mantén una base activa.', action: 'Acorta los últimos pasos, baja la cadera y frena con el apoyo exterior estable.', control: 'Termina sin juntar los pies y con el tronco preparado para salir.', avoid: 'No cruces el pie de frenado por delante del cuerpo ni dejes la cadera alta.' },
       { goal: 'desaceleracion', match: /run-5-stop|sprint-10-stop|sprint-15-stop|drop-step-stop|backpedal-stop/, setup: 'Ajusta la distancia y la velocidad para entrar en la zona de frenado con control.', action: 'Acorta progresivamente los pasos y baja la cadera antes del apoyo final.', control: 'Detente dentro de la zona, estable y sin pasos adicionales.', avoid: 'No esperes al último paso para frenar ni bloquees la rodilla al contactar.' },
       { goal: 'desaceleracion', match: /sprint-20-progressive-stop|curved-run-stop/, setup: 'Marca una entrada de alta velocidad y una zona de frenado suficientemente larga y visible.', action: 'Reduce la velocidad con varios apoyos activos, bajando progresivamente el centro de masas.', control: 'Completa la parada dentro de la zona sin desviarte ni perder equilibrio.', avoid: 'No concentres toda la frenada en el último apoyo ni entres a una velocidad que no puedas controlar.' },
-      { goal: 'desaceleracion', match: /shuffle-cut-90/, setup: 'Parte en desplazamiento lateral con cadera baja y conoce el lado de corte antes de acelerar.', action: 'Frena con el apoyo exterior, orienta cadera y pie y sal a 90° con pasos cortos.', control: 'Reacelera sin cruzar los pies ni añadir pasos de corrección.', avoid: 'No plantes el pie rígido lejos del cuerpo ni gires solo desde la rodilla.' },
+      { goal: 'cambio-direccion', match: /shuffle-cut-90/, setup: 'Parte en desplazamiento lateral con cadera baja y conoce el lado de corte antes de acelerar.', action: 'Frena con el apoyo exterior, orienta cadera y pie y sal a 90° con pasos cortos.', control: 'Reacelera sin cruzar los pies ni añadir pasos de corrección.', avoid: 'No plantes el pie rígido lejos del cuerpo ni gires solo desde la rodilla.' },
       { goal: 'desaceleracion', match: /aerial-reception-stop/, setup: 'Usa una altura baja y prepara la recepción con mirada al frente y brazos equilibrados.', action: 'Recibe el cuerpo y distribuye la fuerza entre tobillo, rodilla y cadera antes de detenerte.', control: 'Mantén la posición final 2 segundos sin pasos ni rebotes.', avoid: 'No aumentes altura o velocidad si necesitas un paso extra para estabilizar.' },
-      { goal: 'desaceleracion', match: /reactive-three-cone-stop/, setup: 'Coloca tres referencias claras y adopta una postura preparada para responder a la señal.', action: 'Acelera hacia el cono indicado y organiza la frenada antes de entrar en la zona.', control: 'Detente equilibrado y orientado para responder a la siguiente señal.', avoid: 'No adivines el estímulo ni sacrifiques la técnica por reaccionar antes.' },
+      { goal: 'agilidad-reactiva', match: /reactive-three-cone-stop/, setup: 'Coloca tres referencias claras y adopta una postura preparada para responder a la señal.', action: 'Acelera hacia el cono indicado y organiza la frenada antes de entrar en la zona.', control: 'Detente equilibrado y orientado para responder a la siguiente señal.', avoid: 'No adivines el estímulo ni sacrifiques la técnica por reaccionar antes.' },
       { goal: 'core', match: /pallof/, setup: 'Colócate perpendicular al cable, con manos frente al pecho y pelvis estable.', action: 'Extiende los brazos sin permitir que el tronco rote hacia la carga.', control: 'Mantén hombros y caderas orientados al frente durante todo el recorrido.', avoid: 'No compenses inclinándote o acercando las manos al cuerpo.' },
       { goal: 'core', match: /dead-bug/, setup: 'Túmbate con caderas y rodillas a 90°, costillas abajo y zona lumbar controlada.', action: 'Extiende brazo y pierna contrarios mientras exhalas lentamente.', control: 'Detén el recorrido antes de que la pelvis cambie o la espalda se arquee.', avoid: 'No aceleres las repeticiones ni pierdas la presión abdominal.' },
       { goal: 'core', match: /side-plank|copenhagen/, setup: 'Alinea hombro, pelvis y apoyo; en Copenhagen coloca la pierna superior firme sobre el banco.', action: 'Eleva la pelvis y mantén el cuerpo en una línea estable.', control: 'Respira sin que la pelvis caiga o rote.', avoid: 'No cargues el cuello ni adelantes el hombro respecto al codo.' },
@@ -3012,9 +3274,23 @@
       fuerza: 'Fuerza',
       isometrias: 'Isometrías',
       desaceleracion: 'Desaceleración',
+      aceleracion: 'Aceleración',
+      'velocidad-maxima': 'Velocidad máxima',
+      'cambio-direccion': 'Cambio de dirección',
+      'agilidad-reactiva': 'Agilidad reactiva',
+      'sprint-repetido': 'Sprint repetido',
       core: 'Core',
       'pie-tobillo': 'Pie y tobillo'
     };
+
+    function syncMetricCounts() {
+      document.querySelectorAll('.metric[data-map]').forEach(function (metric) {
+        const goal = metric.dataset.map;
+        const count = exercises.filter(function (exercise) { return exercise.goal === goal; }).length;
+        const value = metric.querySelector('.metric-value');
+        if (value) value.textContent = count + (count === 1 ? ' tarea' : ' tareas');
+      });
+    }
 
     function builderUid(prefix) {
       return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
@@ -3057,7 +3333,7 @@
                   id: item.id,
                   dose: String(item.dose || ''),
                   load: item.load === '' || item.load == null ? '' : Number(item.load),
-                  loadUnit: item.loadUnit === '%1RM' ? '%1RM' : 'kg',
+                  loadUnit: ['%1RM', '%BM', '%Vdec'].includes(item.loadUnit) ? item.loadUnit : 'kg',
                   targetRpe: item.targetRpe === '' || item.targetRpe == null ? '' : Number(item.targetRpe),
                   targetRir: item.targetRir === '' || item.targetRir == null ? '' : Number(item.targetRir),
                   done: Boolean(item.done)
@@ -3360,10 +3636,10 @@
       const list = items.length ? '<div class="routine-list" data-routine-drop="' + session.id + '">' +
         items.map(function (item, index) {
           const exercise = getExercise(item.id);
-          const acceptsLoad = exercise.goal === 'fuerza' || exercise.goal === 'potencia';
+          const acceptsLoad = exercise.goal === 'fuerza' || exercise.goal === 'potencia' || exercise.goal === 'aceleracion';
           const acceptsEffort = exercise.goal === 'fuerza';
           const loadValue = item.load === '' || item.load == null ? '' : item.load;
-          const loadUnit = item.loadUnit === '%1RM' ? '%1RM' : 'kg';
+          const loadUnit = ['%1RM', '%BM', '%Vdec'].includes(item.loadUnit) ? item.loadUnit : 'kg';
           const targetRpe = item.targetRpe === '' || item.targetRpe == null ? '' : item.targetRpe;
           const targetRir = item.targetRir === '' || item.targetRir == null ? '' : item.targetRir;
           return '<div class="routine-row ' + (item.done ? 'done' : '') + '" data-goal="' + exercise.goal + '">' +
@@ -3371,7 +3647,7 @@
             '<div><span class="goal-tag" data-goal="' + exercise.goal + '">' + goalNames[exercise.goal] + '</span><div class="routine-exercise-name">' + exercise.name + '</div></div>' +
             '<div class="routine-prescription">' +
               '<input class="routine-dose" data-routine-dose="' + index + '" value="' + item.dose + '" aria-label="Dosis final planificada de ' + exercise.name + '" title="Esta dosis editable será la referencia en Valorar y progresar. Ej.: 7 contactos totales o 3 × 7 contactos.">' +
-              (acceptsLoad ? '<div class="routine-load-wrap ' + (acceptsEffort ? 'has-effort' : '') + '"><input class="routine-load" type="number" min="0" step="0.5" data-routine-load="' + index + '" value="' + loadValue + '" placeholder="Carga" aria-label="Carga prescrita de ' + exercise.name + '"><select class="routine-load-unit" data-routine-load-unit="' + index + '" aria-label="Unidad de la carga prescrita"><option value="kg" ' + (loadUnit === 'kg' ? 'selected' : '') + '>kg</option><option value="%1RM" ' + (loadUnit === '%1RM' ? 'selected' : '') + '>%1RM</option></select>' + (acceptsEffort ? '<input class="routine-effort" type="number" min="1" max="10" step="0.5" data-routine-rpe="' + index + '" value="' + targetRpe + '" placeholder="RPE" aria-label="RPE objetivo de ' + exercise.name + '"><input class="routine-effort" type="number" min="0" max="10" step="1" data-routine-rir="' + index + '" value="' + targetRir + '" placeholder="RIR" aria-label="RIR objetivo de ' + exercise.name + '">' : '') + '</div>' : '') +
+              (acceptsLoad ? '<div class="routine-load-wrap ' + (acceptsEffort ? 'has-effort' : '') + '"><input class="routine-load" type="number" min="0" step="0.5" data-routine-load="' + index + '" value="' + loadValue + '" placeholder="Carga" aria-label="Carga prescrita de ' + exercise.name + '"><select class="routine-load-unit" data-routine-load-unit="' + index + '" aria-label="Unidad de la carga prescrita"><option value="kg" ' + (loadUnit === 'kg' ? 'selected' : '') + '>kg</option><option value="%1RM" ' + (loadUnit === '%1RM' ? 'selected' : '') + '>%1RM</option><option value="%BM" ' + (loadUnit === '%BM' ? 'selected' : '') + '>% peso corporal</option><option value="%Vdec" ' + (loadUnit === '%Vdec' ? 'selected' : '') + '>% pérdida velocidad</option></select>' + (acceptsEffort ? '<input class="routine-effort" type="number" min="1" max="10" step="0.5" data-routine-rpe="' + index + '" value="' + targetRpe + '" placeholder="RPE" aria-label="RPE objetivo de ' + exercise.name + '"><input class="routine-effort" type="number" min="0" max="10" step="1" data-routine-rir="' + index + '" value="' + targetRir + '" placeholder="RIR" aria-label="RIR objetivo de ' + exercise.name + '">' : '') + '</div>' : '') +
             '</div>' +
             '<div class="routine-actions">' +
               '<button class="routine-action" type="button" data-routine-up="' + index + '" aria-label="Subir ' + exercise.name + '">↑</button>' +
@@ -3391,6 +3667,7 @@
     }
 
     function renderAll() {
+      syncMetricCounts();
       renderExercises();
       renderRoutine();
     }
@@ -3519,7 +3796,7 @@
 
     function clonedRoutineItems(items) {
       return (items || []).map(function (item) {
-        return { id: item.id, dose: item.dose, load: item.load === '' || item.load == null ? '' : Number(item.load), loadUnit: item.loadUnit === '%1RM' ? '%1RM' : 'kg', targetRpe: item.targetRpe === '' || item.targetRpe == null ? '' : Number(item.targetRpe), targetRir: item.targetRir === '' || item.targetRir == null ? '' : Number(item.targetRir), done: false };
+        return { id: item.id, dose: item.dose, load: item.load === '' || item.load == null ? '' : Number(item.load), loadUnit: ['%1RM', '%BM', '%Vdec'].includes(item.loadUnit) ? item.loadUnit : 'kg', targetRpe: item.targetRpe === '' || item.targetRpe == null ? '' : Number(item.targetRpe), targetRir: item.targetRir === '' || item.targetRir == null ? '' : Number(item.targetRir), done: false };
       });
     }
 
@@ -3709,7 +3986,7 @@
         doseChange = { microcycleId: activeMicrocycle().id, sessionId: activeSession().id };
       }
       if (loadUnit) {
-        activeSession().items[Number(loadUnit.dataset.routineLoadUnit)].loadUnit = loadUnit.value === '%1RM' ? '%1RM' : 'kg';
+        activeSession().items[Number(loadUnit.dataset.routineLoadUnit)].loadUnit = ['%1RM', '%BM', '%Vdec'].includes(loadUnit.value) ? loadUnit.value : 'kg';
         doseChange = { microcycleId: activeMicrocycle().id, sessionId: activeSession().id };
       }
       if (targetRpe) {
@@ -4096,7 +4373,7 @@
           microcycle.sessions.push(session);
         }
         session.name = assigned.sessionName || assigned.routineName || session.name;
-        session.items = assigned.exercises.filter(function (item) { return Boolean(getExercise(item.id)); }).map(function (item) { return { id: item.id, dose: item.dose, load: item.load === '' || item.load == null ? '' : Number(item.load), loadUnit: item.loadUnit === '%1RM' ? '%1RM' : 'kg', targetRpe: item.targetRpe === '' || item.targetRpe == null ? '' : Number(item.targetRpe), targetRir: item.targetRir === '' || item.targetRir == null ? '' : Number(item.targetRir), done: false }; });
+        session.items = assigned.exercises.filter(function (item) { return Boolean(getExercise(item.id)); }).map(function (item) { return { id: item.id, dose: item.dose, load: item.load === '' || item.load == null ? '' : Number(item.load), loadUnit: ['%1RM', '%BM', '%Vdec'].includes(item.loadUnit) ? item.loadUnit : 'kg', targetRpe: item.targetRpe === '' || item.targetRpe == null ? '' : Number(item.targetRpe), targetRir: item.targetRir === '' || item.targetRir == null ? '' : Number(item.targetRir), done: false }; });
         saveBuilder();
         setActiveMicrocycle(microcycle.id, session.id);
         syncSessionOptions();
@@ -4390,11 +4667,11 @@
             result.plyoContacts += dose.total;
             if (isHighIntensityPlyo(exercise)) result.highContacts += dose.total;
           }
-          if (exercise.goal === 'desaceleracion') result.decelEfforts += dose.seconds ? dose.sets : dose.total;
+          if (exercise.goal === 'desaceleracion' || exercise.goal === 'cambio-direccion' || exercise.goal === 'agilidad-reactiva') result.decelEfforts += dose.seconds ? dose.sets : dose.total;
           if (exercise.goal === 'isometrias' && dose.seconds) result.isoSeconds += dose.total;
           if (exercise.goal === 'fuerza' || exercise.goal === 'potencia') {
             result.strengthExercises.push({ exercise: exercise, item: item, dose: dose });
-            if (item.loadUnit !== '%1RM' && Number(item.load) > 0) result.tonnage += Number(item.load) * dose.total;
+            if ((!item.loadUnit || item.loadUnit === 'kg') && Number(item.load) > 0) result.tonnage += Number(item.load) * dose.total;
           }
         });
         result.plyoContacts = Math.round(result.plyoContacts);
@@ -4542,7 +4819,7 @@
             level: exercise ? exercise.level : '',
             dose: item.dose,
             load: item.load === '' || item.load == null ? '' : Number(item.load),
-            loadUnit: item.loadUnit === '%1RM' ? '%1RM' : 'kg',
+            loadUnit: ['%1RM', '%BM', '%Vdec'].includes(item.loadUnit) ? item.loadUnit : 'kg',
             targetRpe: item.targetRpe === '' || item.targetRpe == null ? '' : Number(item.targetRpe),
             targetRir: item.targetRir === '' || item.targetRir == null ? '' : Number(item.targetRir)
           };
@@ -4733,9 +5010,9 @@
       }
 
       function portalGoalColor(goal) {
-        if (goal === 'potencia') return '#e63b2e';
+        if (goal === 'potencia' || goal === 'aceleracion' || goal === 'velocidad-maxima' || goal === 'sprint-repetido') return '#e63b2e';
         if (goal === 'fuerza' || goal === 'pie-tobillo') return '#ffd21f';
-        if (goal === 'desaceleracion') return '#27ad5f';
+        if (goal === 'desaceleracion' || goal === 'cambio-direccion' || goal === 'agilidad-reactiva') return '#27ad5f';
         if (goal === 'isometrias' || goal === 'core') return '#ffffff';
         return '#ff7a00';
       }
@@ -4768,7 +5045,7 @@
         }
         host.innerHTML = derived.strengthExercises.map(function (entry) {
           const sets = Math.max(1, Math.min(12, Math.round(entry.dose.sets || 1)));
-          const plannedKg = entry.item.loadUnit !== '%1RM' ? Number(entry.item.load) || 0 : 0;
+          const plannedKg = !entry.item.loadUnit || entry.item.loadUnit === 'kg' ? Number(entry.item.load) || 0 : 0;
           const plannedReps = Math.round(entry.dose.repsPerSet || 0);
           const prescribed = entry.item.load === '' || entry.item.load == null ? 'sin carga prescrita' : entry.item.load + ' ' + (entry.item.loadUnit || 'kg');
           const effort = [entry.item.targetRpe === '' || entry.item.targetRpe == null ? '' : 'RPE ' + entry.item.targetRpe, entry.item.targetRir === '' || entry.item.targetRir == null ? '' : 'RIR ' + entry.item.targetRir].filter(Boolean).join(' · ');
