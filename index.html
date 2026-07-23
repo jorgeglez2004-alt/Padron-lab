@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
+  <meta name="codex-preview" content="development">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Explorador interactivo de progresiones de pliometría, potencia y desaceleración para futbolistas.">
   <title>PADRON-LAB — Progresiones para futbolistas</title>
@@ -1647,7 +1648,7 @@
       *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
     }
 
-    /* UX shell · v2026.07.23.1 */
+    /* UX shell · v2026.07.23.2 */
     body { min-width: 320px; background: #f6f3ef; }
     .hero {
       position: sticky; top: 0; z-index: 40; min-height: 0; overflow: visible;
@@ -2632,7 +2633,7 @@
   </dialog>
 
   <footer class="footer">
-    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.23.1 UX</span>
+    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.23.2 UX</span>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -6733,6 +6734,30 @@
       try { return JSON.parse(localStorage.getItem(INVITE_SETUP_KEY) || 'null'); } catch (error) { return null; }
     }
 
+    function athletePasswordSetupCompleted() {
+      return Boolean(
+        cloudSession &&
+        cloudSession.user &&
+        cloudSession.user.user_metadata &&
+        cloudSession.user.user_metadata.password_setup_completed === true
+      );
+    }
+
+    function clearAthleteInviteSetup() {
+      localStorage.removeItem(INVITE_SETUP_KEY);
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('padronInvite');
+      cleanUrl.searchParams.delete('claim');
+      cleanUrl.searchParams.delete('cloudUrl');
+      cleanUrl.searchParams.delete('cloudKey');
+      const authHash = new URLSearchParams(cleanUrl.hash.replace(/^#/, ''));
+      ['access_token', 'refresh_token', 'expires_at', 'expires_in', 'provider_token', 'token_type', 'type'].forEach(function (key) {
+        authHash.delete(key);
+      });
+      cleanUrl.hash = authHash.toString() ? '#' + authHash.toString() : '';
+      window.history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+    }
+
     function athleteInviteRedirect(code) {
       const url = new URL(window.location.origin + window.location.pathname);
       const settings = cloudSettings();
@@ -6820,6 +6845,10 @@
 
     function showPasswordSetupIfNeeded() {
       if (!pendingAthleteInvite() || !cloudSession || !cloudProfile || cloudProfile.role !== 'athlete') return;
+      if (athletePasswordSetupCompleted()) {
+        clearAthleteInviteSetup();
+        return;
+      }
       if (cloudDialog.open) cloudDialog.close();
       const athletePanel = document.getElementById('athleteDialog');
       if (athletePanel && athletePanel.open && typeof athletePanel.close === 'function') athletePanel.close();
@@ -7082,17 +7111,18 @@
       passwordSetupState.textContent = 'Guardando la contraseña y preparando tu portal…';
       try {
         await loadSupabase();
-        const updated = await supabaseClient.auth.updateUser({ password: password });
+        const updated = await supabaseClient.auth.updateUser({
+          password: password,
+          data: {
+            password_setup_completed: true,
+            password_setup_completed_at: new Date().toISOString()
+          }
+        });
         if (updated.error) throw updated.error;
+        if (updated.data && updated.data.user && cloudSession) cloudSession.user = updated.data.user;
         await claimPendingAthleteInvite();
         await hydrateCloud();
-        localStorage.removeItem(INVITE_SETUP_KEY);
-        const cleanUrl = new URL(window.location.href);
-        cleanUrl.searchParams.delete('padronInvite');
-        cleanUrl.searchParams.delete('claim');
-        cleanUrl.searchParams.delete('cloudUrl');
-        cleanUrl.searchParams.delete('cloudKey');
-        window.history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+        clearAthleteInviteSetup();
         passwordSetupState.dataset.state = 'success';
         passwordSetupState.textContent = 'Contraseña guardada. Ya puedes acceder a tus sesiones.';
         setTimeout(function () { passwordSetupDialog.close(); }, 650);
