@@ -275,7 +275,7 @@
     }
     .app-context-inner {
       display: grid;
-      grid-template-columns: minmax(180px, 1fr) minmax(170px, .7fr) repeat(5, auto);
+      grid-template-columns: minmax(180px, 1fr) minmax(170px, .7fr) repeat(6, auto);
       gap: 10px;
       align-items: end;
       padding: 15px;
@@ -789,6 +789,8 @@
 
     .profile-dialog {
       width: min(760px, calc(100% - 32px));
+      max-height: calc(100dvh - 32px);
+      overflow-y: auto;
       padding: 0;
       border: 1px solid rgba(255,122,0,.38);
       border-radius: 22px;
@@ -808,8 +810,13 @@
     .profile-fields input::placeholder, .profile-fields textarea::placeholder { color: rgba(255,255,255,.35); }
     .profile-wide { grid-column: 1 / -1; }
     .profile-privacy { margin: 15px 0 0; color: rgba(255,255,255,.5); font-size: .7rem; }
+    .profile-invite-state { margin: 12px 0 0; padding: 10px 12px; border-left: 4px solid var(--orange); border-radius: 8px; color: rgba(255,255,255,.76); background: rgba(255,122,0,.1); font-size: .7rem; }
+    .profile-invite-state[data-state="error"] { border-left-color: var(--danger); background: rgba(216,75,91,.12); }
+    .profile-invite-state[data-state="success"] { border-left-color: var(--type-green); background: rgba(39,173,95,.12); }
     .profile-actions { display: grid; grid-template-columns: auto 1fr auto auto; gap: 8px; align-items: center; margin-top: 20px; }
     .profile-delete { min-height: 40px; padding: 0 12px; border: 1px solid rgba(216,75,91,.5); border-radius: 9px; color: #ff9ca7; background: transparent; font-size: .7rem; font-weight: 900; }
+    .profile-actions button[aria-busy="true"] { cursor: wait; opacity: .7; }
+    .password-setup-copy { margin: 10px 0 0; color: rgba(255,255,255,.62); font-size: .76rem; }
     .cloud-dialog-content { padding: 24px; }
     .cloud-section { margin-top: 18px; padding: 14px; border: 1px solid rgba(255,255,255,.13); border-radius: 13px; background: rgba(255,255,255,.04); }
     .cloud-section h4 { margin: 0 0 4px; color: var(--white); font-size: .86rem; }
@@ -1575,7 +1582,8 @@
       .app-context-inner { grid-template-columns: 1fr auto; padding: 11px; }
       .context-heading { grid-column: 1 / -1; }
       .context-field { grid-column: 1 / -1; }
-      #editAthleteBtn { grid-column: 2; }
+      .app-context-inner .context-action { width: 100%; }
+      #cloudSettingsBtn { grid-column: 1 / -1; }
       .controls-wrap { padding: 0 12px; margin-top: 12px; }
       .controls { grid-template-columns: 1fr; padding: 12px; }
       .layout { padding: 46px 16px 75px; }
@@ -1638,17 +1646,378 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
     }
+
+    /* UX shell · v2026.07.23.1 */
+    body { min-width: 320px; background: #f6f3ef; }
+    .hero {
+      position: sticky; top: 0; z-index: 40; min-height: 0; overflow: visible;
+      border-bottom: 1px solid rgba(255,255,255,.09); box-shadow: 0 8px 28px rgba(0,0,0,.12);
+    }
+    .hero::before, .hero::after, .hero-inner { display: none; }
+    .topbar {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 24px;
+      max-width: 1380px; min-height: 72px; padding: 12px 24px;
+    }
+    .app-view-tabs { justify-self: center; border: 0; background: rgba(255,255,255,.08); }
+    .app-view-tab { min-height: 42px; padding: 0 18px; font-size: .76rem; }
+    .sync-indicator {
+      position: relative; min-height: 38px; padding: 8px 12px 8px 29px;
+      border: 1px solid rgba(255,255,255,.14); color: rgba(255,255,255,.82);
+      background: rgba(255,255,255,.08);
+    }
+    .sync-indicator::before {
+      content: ""; position: absolute; left: 12px; top: 50%; width: 8px; height: 8px;
+      border-radius: 50%; background: #9b938b; transform: translateY(-50%);
+      box-shadow: 0 0 0 4px rgba(155,147,139,.12);
+    }
+    .sync-indicator[data-sync-state="synced"]::before { background: #27ad5f; box-shadow: 0 0 0 4px rgba(39,173,95,.16); }
+    .sync-indicator[data-sync-state="saving"]::before { background: var(--orange); box-shadow: 0 0 0 4px rgba(255,122,0,.16); animation: syncPulse 1s ease-in-out infinite; }
+    .sync-indicator[data-sync-state="error"]::before { background: var(--danger); box-shadow: 0 0 0 4px rgba(216,75,91,.15); }
+    @keyframes syncPulse { 50% { opacity: .45; transform: translateY(-50%) scale(.75); } }
+
+    .home-view-block, .athletes-view-block, .tracking-view-block, .athlete-view-block { display: none; }
+    body[data-app-view="home"] .home-view-block,
+    body[data-app-view="athletes"] .athletes-view-block,
+    body[data-app-view="tracking"] .tracking-view-block,
+    body[data-app-view="athlete"] .athlete-view-block { display: block; }
+    body[data-app-view="home"] .session-view-block,
+    body[data-app-view="athletes"] .session-view-block,
+    body[data-app-view="tracking"] .session-view-block,
+    body[data-app-view="athlete"] .session-view-block { display: none !important; }
+    body:not([data-app-view="tracking"]) .tracking-view-block,
+    body:not([data-app-view="athlete"]) .athlete-view-block { display: none; }
+
+    .app-context {
+      position: sticky; top: 72px; z-index: 30; max-width: none; margin: 0; padding: 10px 24px;
+      background: rgba(246,243,239,.94); backdrop-filter: blur(14px);
+    }
+    .app-context-inner {
+      grid-template-columns: minmax(210px, 1fr) minmax(210px, 320px) auto minmax(150px, auto);
+      max-width: 1332px; margin: 0 auto; padding: 10px 12px; border-radius: 14px;
+      box-shadow: 0 9px 26px rgba(0,0,0,.07);
+    }
+    .context-hint { align-self: center; color: var(--muted); font-size: .68rem; font-weight: 700; text-align: right; }
+    body[data-app-view="home"] .app-context,
+    body[data-app-view="athletes"] .app-context,
+    body[data-app-view="athlete"] .app-context { display: none; }
+
+    .workspace-view {
+      width: min(1332px, calc(100% - 48px)); min-height: calc(100vh - 72px);
+      margin: 0 auto; padding: 48px 0 84px;
+    }
+    .workspace-intro { display: flex; align-items: end; justify-content: space-between; gap: 30px; margin-bottom: 28px; }
+    .workspace-intro h2 { margin: 4px 0 8px; font-size: clamp(2rem, 4vw, 3.8rem); line-height: 1; letter-spacing: -.045em; }
+    .workspace-intro p:not(.section-kicker) { max-width: 710px; margin: 0; color: var(--muted); font-size: .92rem; }
+    .dashboard-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .dashboard-stats article {
+      position: relative; min-height: 150px; padding: 22px; overflow: hidden;
+      border: 1px solid var(--line); border-radius: 20px; background: var(--white);
+      box-shadow: 0 8px 22px rgba(0,0,0,.045);
+    }
+    .dashboard-stats article::after {
+      content: ""; position: absolute; right: -24px; bottom: -34px; width: 86px; height: 86px;
+      border: 18px solid rgba(255,122,0,.07); border-radius: 50%;
+    }
+    .dashboard-stats span, .dashboard-card-head span {
+      color: var(--muted); font-size: .62rem; font-weight: 950; letter-spacing: .07em; text-transform: uppercase;
+    }
+    .dashboard-stats strong { display: block; margin-top: 12px; font-size: 2.7rem; line-height: 1; }
+    .dashboard-stats small { color: var(--muted); font-size: .7rem; }
+    .dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); gap: 18px; }
+    .dashboard-card {
+      padding: 24px; border: 1px solid var(--line); border-radius: 22px;
+      background: var(--white); box-shadow: 0 9px 26px rgba(0,0,0,.045);
+    }
+    .dashboard-card-head { margin-bottom: 16px; }
+    .dashboard-card-head h3 { margin: 3px 0 0; font-size: 1.3rem; }
+    .dashboard-actions > button {
+      display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center;
+      width: 100%; min-height: 74px; padding: 12px 14px; border: 0; border-top: 1px solid var(--line);
+      color: var(--ink); text-align: left; background: transparent;
+    }
+    .dashboard-actions > button:hover { background: #fff8f0; }
+    .dashboard-actions > button > span {
+      display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px;
+      color: #793500; background: rgba(255,122,0,.14); font-size: .67rem; font-weight: 950;
+    }
+    .dashboard-actions button div { display: grid; gap: 2px; }
+    .dashboard-actions button strong { font-size: .84rem; }
+    .dashboard-actions button small { color: var(--muted); font-size: .69rem; }
+    .dashboard-actions button b { color: var(--orange); font-size: 1.15rem; }
+    .dashboard-pending { display: grid; gap: 9px; }
+    .pending-item {
+      display: grid; grid-template-columns: 10px 1fr auto; gap: 11px; align-items: center;
+      padding: 12px; border-radius: 12px; background: #f8f5f1;
+    }
+    .pending-item > i { width: 9px; height: 9px; border-radius: 50%; background: var(--orange); }
+    .pending-item[data-tone="green"] > i { background: #27ad5f; }
+    .pending-item div { display: grid; gap: 2px; }
+    .pending-item strong { font-size: .76rem; }
+    .pending-item small { color: var(--muted); font-size: .65rem; }
+    .pending-item button { min-height: 36px; border: 0; color: var(--lime-deep); background: transparent; font-size: .67rem; font-weight: 900; }
+    .dashboard-empty { padding: 26px 16px; border: 1px dashed var(--line); border-radius: 13px; color: var(--muted); text-align: center; font-size: .76rem; }
+
+    .athlete-directory-tools {
+      display: flex; align-items: end; justify-content: space-between; gap: 18px;
+      margin-bottom: 16px; padding: 14px; border: 1px solid var(--line);
+      border-radius: 16px; background: var(--white);
+    }
+    .athlete-directory-tools label { display: grid; flex: 1; max-width: 520px; gap: 5px; }
+    .athlete-directory-tools label span { color: var(--muted); font-size: .61rem; font-weight: 950; text-transform: uppercase; }
+    .athlete-directory-tools input { min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: #fffdfa; }
+    .athlete-directory-tools > span { color: var(--muted); font-size: .72rem; font-weight: 850; }
+    .athlete-directory { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .athlete-directory-card {
+      display: grid; gap: 18px; padding: 20px; border: 1px solid var(--line); border-radius: 20px;
+      background: var(--white); box-shadow: 0 8px 22px rgba(0,0,0,.04);
+    }
+    .athlete-directory-head { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; }
+    .athlete-avatar {
+      display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px;
+      color: var(--navy-950); background: var(--orange); font-size: .8rem; font-weight: 950;
+    }
+    .athlete-directory-head div { display: grid; gap: 2px; }
+    .athlete-directory-head strong { font-size: .92rem; }
+    .athlete-directory-head small { color: var(--muted); font-size: .66rem; }
+    .access-status {
+      padding: 6px 8px; border-radius: 999px; color: #6a5300; background: rgba(255,210,31,.18);
+      font-size: .59rem; font-weight: 950; white-space: nowrap;
+    }
+    .access-status[data-state="active"] { color: #11622f; background: rgba(39,173,95,.14); }
+    .access-status[data-state="error"] { color: #8b2030; background: rgba(216,75,91,.13); }
+    .access-status[data-state="missing"] { color: var(--muted); background: #eee9e4; }
+    .athlete-directory-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .athlete-directory-meta span { display: grid; gap: 3px; padding: 10px; border-radius: 11px; background: #f8f5f1; }
+    .athlete-directory-meta small { color: var(--muted); font-size: .57rem; font-weight: 900; text-transform: uppercase; }
+    .athlete-directory-meta strong { overflow: hidden; font-size: .69rem; text-overflow: ellipsis; white-space: nowrap; }
+    .athlete-directory-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+    .athlete-directory-actions button {
+      min-height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 9px;
+      color: var(--ink); background: var(--white); font-size: .65rem; font-weight: 900;
+    }
+    .athlete-directory-actions button[data-athlete-action="plan"] { color: var(--navy-950); border-color: var(--orange); background: var(--orange); }
+    .athlete-directory-empty { grid-column: 1 / -1; padding: 60px 24px; border: 1px dashed var(--line); border-radius: 20px; color: var(--muted); text-align: center; }
+    .athlete-directory-empty strong { display: block; margin-bottom: 6px; color: var(--ink); }
+
+    .planning-guide {
+      position: relative; z-index: 10; width: min(1332px, calc(100% - 48px));
+      margin: 16px auto 0; padding: 16px; border: 1px solid var(--line);
+      border-radius: 18px; background: var(--white); box-shadow: 0 9px 26px rgba(0,0,0,.05);
+    }
+    .planning-guide-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+    .planning-guide-head div { display: grid; gap: 1px; }
+    .planning-guide-head span { color: var(--orange); font-size: .59rem; font-weight: 950; text-transform: uppercase; }
+    .planning-guide-head strong { font-size: .82rem; }
+    .planning-guide-head > small { color: var(--muted); font-size: .67rem; }
+    .planning-steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .planning-steps button {
+      display: grid; grid-template-columns: 28px 1fr; align-items: center; width: 100%;
+      min-height: 50px; padding: 7px 8px; border: 1px solid var(--line); border-radius: 10px;
+      color: var(--ink); text-align: left; background: #fbf8f4;
+    }
+    .planning-steps button > span {
+      grid-row: 1 / 3; display: grid; place-items: center; width: 24px; height: 24px;
+      border-radius: 50%; color: #713100; background: rgba(255,122,0,.13); font-size: .62rem; font-weight: 950;
+    }
+    .planning-steps button strong { font-size: .65rem; }
+    .planning-steps button small { color: var(--muted); font-size: .55rem; }
+    .planning-steps button[aria-current="step"] { border-color: var(--orange); background: #fff5ea; }
+    .planning-steps button[data-complete="true"] > span { color: var(--white); background: #27ad5f; }
+    .planning-context-summary {
+      display: grid; grid-template-columns: 1.2fr repeat(4, 1fr); gap: 1px;
+      margin-top: 10px; overflow: hidden; border-radius: 10px; background: var(--line);
+    }
+    .planning-context-summary > span { display: grid; gap: 2px; min-width: 0; padding: 9px 11px; background: #f8f5f1; }
+    .planning-context-summary small { color: var(--muted); font-size: .54rem; font-weight: 900; text-transform: uppercase; }
+    .planning-context-summary strong { overflow: hidden; font-size: .66rem; text-overflow: ellipsis; white-space: nowrap; }
+    .controls-wrap { margin-top: 16px; }
+    .controls { box-shadow: 0 8px 24px rgba(0,0,0,.055); }
+    .add-btn { width: auto; min-width: 42px; padding: 0 12px; }
+    .add-btn::after { content: " Añadir"; }
+
+    .profile-more, .cloud-advanced, .advanced-metrics {
+      margin-top: 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.045);
+    }
+    .profile-more > summary, .cloud-advanced > summary, .advanced-metrics > summary {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      min-height: 48px; padding: 10px 13px; cursor: pointer; font-size: .72rem; font-weight: 900; list-style: none;
+    }
+    .profile-more > summary { color: var(--ink); background: #f8f5f1; }
+    .profile-more summary small, .cloud-advanced summary small { color: var(--muted); font-size: .61rem; font-weight: 700; }
+    .profile-more .profile-fields { padding: 14px; }
+    .cloud-advanced { border-color: rgba(255,255,255,.14); }
+    .cloud-advanced > summary { color: rgba(255,255,255,.78); }
+    .cloud-advanced summary small { color: rgba(255,255,255,.44); }
+    .backup-section { margin-bottom: 0; }
+
+    .tracking-header { align-items: end; padding-bottom: 20px; }
+    .tracking-header-actions { display: flex; align-items: end; gap: 14px; }
+    .tracking-header-actions p { max-width: 560px; margin: 0; }
+    .tracking-layout { display: grid; grid-template-columns: minmax(320px, 410px) minmax(0, 1fr); gap: 16px; align-items: start; }
+    .tracking-layout > .coach-inbox { grid-column: 1 / -1; }
+    .metrics-entry {
+      display: none !important; grid-column: 1; position: sticky; top: 158px;
+      max-height: calc(100vh - 178px); overflow: auto;
+    }
+    body[data-manual-entry="open"] .metrics-entry { display: block !important; }
+    body[data-manual-entry="open"] .metrics-entry[aria-hidden="true"] { visibility: visible; }
+    .analytics-panel { grid-column: 1 / -1; }
+    body[data-manual-entry="open"] .analytics-panel { grid-column: 2; }
+    .coach-inbox {
+      margin: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--white);
+      box-shadow: 0 8px 24px rgba(0,0,0,.045);
+    }
+    .coach-inbox-head { padding: 16px 18px; }
+    .coach-inbox-row { grid-template-columns: 10px 1fr 1.2fr 58px 66px minmax(170px, auto); }
+    .coach-inbox-actions button:first-child { color: var(--navy-950); border-color: var(--orange); background: var(--orange); }
+    .advanced-metrics { background: #fffdfa; }
+    .advanced-metrics > summary { color: var(--ink); }
+    .advanced-metrics fieldset { margin: 0 !important; border: 0 !important; border-top: 1px solid var(--line) !important; border-radius: 0 !important; }
+    .advanced-metrics fieldset legend { display: none; }
+
+    dialog { z-index: 1000; }
+    dialog::backdrop { background: rgba(8,8,8,.72); backdrop-filter: blur(5px); }
+    .profile-dialog, .day-picker { max-height: min(88vh, 850px); overflow: auto; overscroll-behavior: contain; }
+    .profile-dialog[open], .day-picker[open] { isolation: isolate; }
+    .profile-fields-essential { grid-template-columns: 1fr 1.2fr; }
+    .profile-fields-essential .profile-wide { grid-column: auto; }
+    .profile-actions { position: sticky; bottom: 0; z-index: 2; padding: 12px 0 2px; background: inherit; }
+    .review-dialog { width: min(720px, calc(100% - 28px)); color: var(--ink); background: var(--white); }
+    .review-dialog form { padding: 22px; }
+    .athlete-review-dialog { width: min(620px, calc(100% - 28px)); }
+    .review-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 18px 0; }
+    .review-summary > div { display: grid; gap: 3px; padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: #f8f5f1; }
+    .review-summary > div.wide { grid-column: 1 / -1; }
+    .review-summary span { color: var(--muted); font-size: .58rem; font-weight: 900; text-transform: uppercase; }
+    .review-summary strong { font-size: .75rem; }
+
+    .trainer-preview-banner {
+      display: flex; align-items: center; justify-content: space-between; gap: 18px;
+      margin-bottom: 20px; padding: 13px 15px; border: 1px solid rgba(255,122,0,.35);
+      border-radius: 13px; background: #fff3e6;
+    }
+    .trainer-preview-banner div { display: grid; gap: 2px; }
+    .trainer-preview-banner span { color: var(--lime-deep); font-size: .59rem; font-weight: 950; text-transform: uppercase; }
+    .trainer-preview-banner strong { font-size: .74rem; }
+    body[data-cloud-role="athlete"] .trainer-preview-banner { display: none; }
+    body[data-cloud-role="athlete"] .app-view-tabs,
+    body[data-cloud-role="athlete"] .app-context,
+    body[data-cloud-role="athlete"] .home-view-block,
+    body[data-cloud-role="athlete"] .athletes-view-block,
+    body[data-cloud-role="athlete"] .session-view-block,
+    body[data-cloud-role="athlete"] .tracking-view-block { display: none !important; }
+    body[data-cloud-role="athlete"] .topbar { grid-template-columns: 1fr auto; }
+    body[data-cloud-role="athlete"] .athlete-view-block { display: block !important; }
+    body[data-cloud-role="athlete"] .athlete-portal-inner { padding-top: 34px; }
+    .athlete-submit-success {
+      grid-template-columns: 40px 1fr auto; gap: 12px; align-items: center;
+      margin: 16px; padding: 14px; border: 1px solid rgba(39,173,95,.28);
+      border-radius: 14px; background: rgba(39,173,95,.09);
+    }
+    .athlete-submit-success:not([hidden]) { display: grid; }
+    .athlete-submit-success > span {
+      display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%;
+      color: white; background: #27ad5f; font-weight: 950;
+    }
+    .athlete-submit-success div { display: grid; gap: 2px; }
+    .athlete-submit-success strong { font-size: .76rem; }
+    .athlete-submit-success small { color: #346343; font-size: .65rem; }
+
+    @media (max-width: 980px) {
+      .topbar { grid-template-columns: auto 1fr auto; gap: 12px; padding-inline: 16px; }
+      .app-view-tab { padding: 0 11px; }
+      .dashboard-stats { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-grid, .athlete-directory { grid-template-columns: 1fr; }
+      .planning-steps { grid-template-columns: repeat(3, 1fr); }
+      .planning-context-summary { grid-template-columns: repeat(2, 1fr); }
+      .planning-context-summary > span:first-child { grid-column: 1 / -1; }
+      .tracking-layout, body[data-manual-entry="open"] .tracking-layout { grid-template-columns: 1fr; }
+      .metrics-entry, body[data-manual-entry="open"] .analytics-panel { grid-column: 1; position: static; max-height: none; }
+      .coach-inbox-row { grid-template-columns: 10px 1fr 1fr 54px; }
+      .coach-inbox-metric:nth-of-type(2) { display: none; }
+      .coach-inbox-actions { grid-column: 2 / -1; justify-content: flex-start; }
+    }
+
+    @media (max-width: 720px) {
+      body { padding-bottom: 72px; }
+      .topbar { grid-template-columns: 1fr auto; min-height: 62px; padding: 10px 14px; }
+      .brand { font-size: .74rem; }
+      .brand-mark { width: 28px; height: 28px; }
+      .sync-indicator { min-width: 0; max-width: 132px; min-height: 38px; overflow: hidden; text-overflow: ellipsis; }
+      .app-view-tabs {
+        position: fixed; left: 10px; right: 10px; bottom: 8px; z-index: 80;
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; padding: 5px;
+        border: 1px solid rgba(255,255,255,.12); border-radius: 16px;
+        background: rgba(8,8,8,.96); box-shadow: 0 15px 45px rgba(0,0,0,.34); backdrop-filter: blur(14px);
+      }
+      .app-view-tab { min-height: 48px; padding: 0 4px; font-size: .61rem; }
+      body[data-cloud-role="athlete"] { padding-bottom: 0; }
+      .workspace-view { width: calc(100% - 28px); padding: 28px 0 58px; }
+      .workspace-intro { align-items: stretch; flex-direction: column; gap: 16px; }
+      .workspace-intro .context-action.primary { width: 100%; }
+      .dashboard-stats { gap: 8px; }
+      .dashboard-stats article { min-height: 124px; padding: 16px; border-radius: 16px; }
+      .dashboard-stats strong { font-size: 2.1rem; }
+      .dashboard-card { padding: 17px; }
+      .athlete-directory-tools { align-items: stretch; flex-direction: column; }
+      .athlete-directory-tools label { max-width: none; }
+      .athlete-directory-head { grid-template-columns: 42px 1fr; }
+      .access-status { grid-column: 1 / -1; justify-self: start; }
+      .athlete-directory-meta { grid-template-columns: 1fr; }
+      .athlete-directory-actions button { flex: 1 1 calc(50% - 7px); min-height: 44px; }
+      .planning-guide { width: calc(100% - 28px); margin-top: 10px; padding: 12px; overflow: hidden; }
+      .planning-guide-head { align-items: flex-start; flex-direction: column; gap: 3px; }
+      .planning-steps { display: flex; margin-inline: -12px; padding: 0 12px 5px; overflow-x: auto; scroll-snap-type: x proximity; }
+      .planning-steps li { flex: 0 0 132px; scroll-snap-align: start; }
+      .planning-context-summary { grid-template-columns: 1fr 1fr; }
+      .planning-context-summary > span:first-child { grid-column: 1 / -1; }
+      .app-context { top: 62px; padding: 8px 14px; }
+      .app-context-inner { grid-template-columns: 1fr auto; gap: 8px; }
+      .context-heading, .context-hint { display: none; }
+      .context-field { min-width: 0; }
+      .context-action { min-height: 44px; }
+      .controls-wrap { padding-inline: 14px; }
+      .controls { grid-template-columns: 1fr; padding: 12px; }
+      .add-btn::after { content: ""; }
+      .tracking-inner { padding-inline: 14px; }
+      .tracking-header { align-items: stretch; flex-direction: column; }
+      .tracking-header-actions { align-items: stretch; flex-direction: column; }
+      .coach-inbox-row { grid-template-columns: 10px 1fr 54px; padding: 12px; }
+      .coach-inbox-session { grid-column: 2 / -1; }
+      .coach-inbox-metric { grid-column: 3; grid-row: 1; }
+      .coach-inbox-actions { grid-column: 2 / -1; }
+      .profile-dialog, .day-picker {
+        width: 100vw !important; max-width: none !important; height: 100dvh;
+        max-height: none; margin: 0; border-radius: 0;
+      }
+      .profile-fields-essential, .profile-fields { grid-template-columns: 1fr !important; }
+      .profile-fields-essential .profile-wide, .profile-wide { grid-column: auto !important; }
+      .profile-more summary, .cloud-advanced summary { align-items: flex-start; flex-direction: column; }
+      .profile-actions { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+      .profile-actions > span { display: none; }
+      .profile-actions .context-action { min-height: 48px; }
+      .review-summary { grid-template-columns: 1fr; }
+      .review-summary > div.wide { grid-column: auto; }
+      .trainer-preview-banner { align-items: stretch; flex-direction: column; }
+      .athlete-portal-inner { padding-inline: 14px; }
+      .athlete-portal-shell { grid-template-columns: 1fr; }
+      .athlete-submit-success { grid-template-columns: 38px 1fr; }
+      .athlete-submit-success button { grid-column: 1 / -1; }
+    }
   </style>
 </head>
-<body data-app-view="session">
+<body data-app-view="home">
   <header class="hero">
     <nav class="topbar" aria-label="Navegación principal">
       <div class="brand"><span class="brand-mark">P</span> PADRON-LAB</div>
       <div class="app-view-tabs" role="tablist" aria-label="Áreas de PADRON-LAB">
-        <button class="app-view-tab" type="button" role="tab" aria-selected="true" data-app-view-target="session">Planificar sesión</button>
-        <button class="app-view-tab" type="button" role="tab" aria-selected="false" data-app-view-target="tracking">Valorar y progresar</button>
-        <button class="app-view-tab" type="button" role="tab" aria-selected="false" data-app-view-target="athlete">Portal deportista</button>
+        <button class="app-view-tab" type="button" role="tab" aria-selected="true" data-app-view-target="home">Inicio</button>
+        <button class="app-view-tab" type="button" role="tab" aria-selected="false" data-app-view-target="athletes">Deportistas</button>
+        <button class="app-view-tab" type="button" role="tab" aria-selected="false" data-app-view-target="session">Planificación</button>
+        <button class="app-view-tab" type="button" role="tab" aria-selected="false" data-app-view-target="tracking">Seguimiento</button>
+        <button class="app-view-tab" type="button" role="tab" aria-selected="false" data-app-view-target="athlete" hidden>Vista del deportista</button>
       </div>
+      <button class="local-badge sync-indicator" id="cloudStatusBadge" type="button" aria-label="Abrir configuración y sincronización" data-sync-state="local">Modo local</button>
     </nav>
 
     <div class="hero-inner">
@@ -1732,20 +2101,82 @@
   <section class="app-context" aria-label="Contexto activo de trabajo">
     <div class="app-context-inner">
       <div class="context-heading">
-        <span class="context-kicker">Contexto sincronizado</span>
+        <span class="context-kicker">Deportista activo</span>
         <strong id="contextStatus">Selecciona o registra un deportista</strong>
       </div>
       <label class="context-field" for="globalAthleteSelect">
         <span>Deportista</span>
         <select id="globalAthleteSelect"><option value="">Sin seleccionar</option></select>
       </label>
-      <button class="context-action primary" id="addAthleteBtn" type="button">+ Registrar</button>
-      <button class="context-action" id="editAthleteBtn" type="button" disabled>Editar</button>
-      <button class="context-action" id="exportBackupBtn" type="button">Copia</button>
-      <button class="context-action" id="importBackupBtn" type="button">Restaurar</button>
-      <button class="context-action" id="cloudSettingsBtn" type="button">Nube</button>
-      <input class="backup-input" id="importBackupFile" type="file" accept="application/json,.json">
-      <span class="local-badge" id="cloudStatusBadge">Guardado local</span>
+      <button class="context-action" id="editAthleteBtn" type="button" disabled>Editar perfil</button>
+      <span class="context-hint" id="activeWorkflowHint">El contexto se mantiene al cambiar de área.</span>
+    </div>
+  </section>
+
+  <main class="workspace-view home-view-block" id="inicio" aria-labelledby="homeTitle">
+    <section class="workspace-intro">
+      <div>
+        <p class="section-kicker">Panel del entrenador</p>
+        <h2 id="homeTitle">Lo importante, a primera vista.</h2>
+        <p>Continúa el trabajo pendiente sin tener que buscarlo entre la planificación y las gráficas.</p>
+      </div>
+      <button class="context-action primary" type="button" data-ux-action="new-athlete">+ Nuevo deportista</button>
+    </section>
+    <section class="dashboard-stats" aria-label="Resumen de actividad">
+      <article><span>Deportistas activos</span><strong id="dashboardAthleteCount">0</strong><small>perfiles disponibles</small></article>
+      <article><span>Por revisar</span><strong id="dashboardReviewCount">0</strong><small>ejecuciones recibidas</small></article>
+      <article><span>Invitaciones pendientes</span><strong id="dashboardInviteCount">0</strong><small>accesos sin confirmar</small></article>
+      <article><span>Sesiones asignadas</span><strong id="dashboardPlanCount">0</strong><small>planes preparados</small></article>
+    </section>
+    <section class="dashboard-grid">
+      <article class="dashboard-card dashboard-actions">
+        <div class="dashboard-card-head"><span>Siguiente acción</span><h3>¿Qué quieres hacer?</h3></div>
+        <button type="button" data-ux-action="plan-session"><span>01</span><div><strong>Planificar sesión</strong><small>Selecciona un deportista y abre el constructor.</small></div><b>→</b></button>
+        <button type="button" data-ux-action="review-records"><span>02</span><div><strong>Revisar ejecuciones</strong><small>Empieza por las entradas enviadas por deportistas.</small></div><b>→</b></button>
+        <button type="button" data-ux-action="open-athletes"><span>03</span><div><strong>Gestionar deportistas</strong><small>Consulta accesos, próximas sesiones e historial.</small></div><b>→</b></button>
+      </article>
+      <article class="dashboard-card">
+        <div class="dashboard-card-head"><span>Atención</span><h3>Trabajo pendiente</h3></div>
+        <div class="dashboard-pending" id="dashboardPendingList"></div>
+      </article>
+    </section>
+  </main>
+
+  <main class="workspace-view athletes-view-block" id="deportistas" aria-labelledby="athletesTitle">
+    <section class="workspace-intro">
+      <div>
+        <p class="section-kicker">Deportistas</p>
+        <h2 id="athletesTitle">Todos los perfiles, en un solo lugar.</h2>
+        <p>El alta, el acceso, la planificación y el seguimiento parten siempre de aquí.</p>
+      </div>
+      <button class="context-action primary" id="addAthleteBtn" type="button">+ Nuevo deportista</button>
+    </section>
+    <div class="athlete-directory-tools">
+      <label><span>Buscar deportista</span><input id="athleteDirectorySearch" type="search" autocomplete="off" placeholder="Nombre, correo, equipo o posición"></label>
+      <span id="athleteDirectoryCount" aria-live="polite">0 deportistas</span>
+    </div>
+    <section class="athlete-directory" id="athleteDirectoryList" aria-live="polite"></section>
+  </main>
+
+  <section class="planning-guide session-view-block" aria-labelledby="planningGuideTitle">
+    <div class="planning-guide-head">
+      <div><span>Recorrido guiado</span><strong id="planningGuideTitle">De la selección a la asignación</strong></div>
+      <small id="planningGuideStatus">Empieza seleccionando un deportista.</small>
+    </div>
+    <ol class="planning-steps">
+      <li><button type="button" data-planning-step="athlete"><span>1</span><strong>Deportista</strong><small>Seleccionar</small></button></li>
+      <li><button type="button" data-planning-step="mesocycle"><span>2</span><strong>Mesociclo</strong><small>Estructura</small></button></li>
+      <li><button type="button" data-planning-step="microcycle"><span>3</span><strong>Microciclo</strong><small>Organizar</small></button></li>
+      <li><button type="button" data-planning-step="session"><span>4</span><strong>Sesión</strong><small>Crear</small></button></li>
+      <li><button type="button" data-planning-step="exercise"><span>5</span><strong>Ejercicios</strong><small>Añadir</small></button></li>
+      <li><button type="button" data-planning-step="assign"><span>6</span><strong>Revisar</strong><small>Asignar</small></button></li>
+    </ol>
+    <div class="planning-context-summary" aria-live="polite">
+      <span><small>Deportista</small><strong id="planningAthleteSummary">Sin seleccionar</strong></span>
+      <span><small>Mesociclo</small><strong id="planningMesocycleSummary">—</strong></span>
+      <span><small>Microciclo</small><strong id="planningMicrocycleSummary">—</strong></span>
+      <span><small>Sesión</small><strong id="planningSessionSummary">—</strong></span>
+      <span><small>Estado</small><strong id="planningStateSummary">Borrador</strong></span>
     </div>
   </section>
 
@@ -1917,65 +2348,108 @@
     <form id="athleteForm">
       <div class="profile-dialog-head">
         <div>
-          <p class="day-picker-kicker">Perfil clínico-deportivo</p>
-          <h3 id="athleteDialogTitle">Registrar deportista</h3>
+          <p class="day-picker-kicker">Acceso y perfil</p>
+          <h3 id="athleteDialogTitle">Nuevo deportista</h3>
         </div>
         <button class="day-picker-close" type="button" data-athlete-close aria-label="Cerrar">×</button>
       </div>
       <input id="athleteEditId" type="hidden">
-      <div class="profile-fields">
+      <div class="profile-fields profile-fields-essential">
         <label><span>Nombre *</span><input id="athleteName" type="text" maxlength="60" required placeholder="Nombre y apellidos"></label>
-        <label><span>Identificador</span><input id="athleteCode" type="text" maxlength="24" placeholder="Ej. JUG-014"></label>
-        <label><span>Equipo</span><input id="athleteTeam" type="text" maxlength="50" placeholder="Equipo o grupo"></label>
-        <label><span>Posición</span><input id="athletePosition" type="text" maxlength="40" placeholder="Ej. ala, cierre, portero"></label>
-        <label class="profile-wide"><span>Correo opcional</span><input id="athleteEmail" type="email" maxlength="90" placeholder="deportista@ejemplo.com"></label>
-        <label class="profile-wide"><span>Patologías o condiciones médicas relevantes</span><textarea id="athletePathologies" maxlength="600" placeholder="Diagnósticos, medicación relevante, contraindicaciones o seguimiento sanitario…"></textarea></label>
-        <label class="profile-wide"><span>Lesiones previas y estado actual</span><textarea id="athleteInjuries" maxlength="600" placeholder="Zona, diagnóstico, lado, fecha aproximada, recaídas y limitaciones actuales…"></textarea></label>
-        <label class="profile-wide"><span>Características del deportista</span><textarea id="athleteCharacteristics" maxlength="600" placeholder="Experiencia, disponibilidad, preferencias, posición, tolerancia de carga o aspectos técnicos relevantes…"></textarea></label>
-        <label class="profile-wide"><span>Objetivos y aspectos que quiere mejorar</span><textarea id="athleteGoals" maxlength="600" placeholder="Objetivos principales, prioridades de rendimiento y necesidades percibidas por el deportista…"></textarea></label>
+        <label class="profile-wide"><span>Correo de acceso *</span><input id="athleteEmail" type="email" maxlength="90" autocomplete="email" required placeholder="deportista@ejemplo.com"></label>
+        <label class="profile-wide"><span>Deporte o disciplina *</span><input id="athleteSport" type="text" maxlength="60" required placeholder="Ej. fútbol sala, atletismo, kick boxing"></label>
       </div>
-      <p class="profile-privacy">Estos datos son sensibles. Mientras no se active la conexión segura con Supabase, se almacenan únicamente en este navegador y no se sincronizan entre dispositivos.</p>
+      <details class="profile-more">
+        <summary>Información adicional <small>equipo, posición, historial y objetivos</small></summary>
+        <div class="profile-fields">
+          <label><span>Identificador</span><input id="athleteCode" type="text" maxlength="24" placeholder="Ej. JUG-014"></label>
+          <label><span>Equipo</span><input id="athleteTeam" type="text" maxlength="50" placeholder="Equipo o grupo"></label>
+          <label><span>Posición</span><input id="athletePosition" type="text" maxlength="40" placeholder="Ej. ala, cierre, portero"></label>
+          <label class="profile-wide"><span>Patologías o condiciones médicas relevantes</span><textarea id="athletePathologies" maxlength="600" placeholder="Diagnósticos, medicación relevante, contraindicaciones o seguimiento sanitario…"></textarea></label>
+          <label class="profile-wide"><span>Lesiones previas y estado actual</span><textarea id="athleteInjuries" maxlength="600" placeholder="Zona, diagnóstico, lado, fecha aproximada, recaídas y limitaciones actuales…"></textarea></label>
+          <label class="profile-wide"><span>Características del deportista</span><textarea id="athleteCharacteristics" maxlength="600" placeholder="Experiencia, disponibilidad, preferencias, tolerancia de carga o aspectos técnicos relevantes…"></textarea></label>
+          <label class="profile-wide"><span>Objetivos y aspectos que quiere mejorar</span><textarea id="athleteGoals" maxlength="600" placeholder="Objetivos principales, prioridades de rendimiento y necesidades percibidas…"></textarea></label>
+        </div>
+      </details>
+      <p class="profile-privacy">Al registrar un perfil nuevo se sincronizarán sus datos y se enviará automáticamente el correo para que el deportista confirme el acceso y elija su contraseña.</p>
+      <p class="profile-invite-state" id="athleteInviteState" role="status">El acceso se enviará desde este formulario; el deportista no tendrá que entrar en Configuración.</p>
       <div class="profile-actions">
         <button class="profile-delete" id="deleteAthleteBtn" type="button" hidden>Eliminar perfil</button>
         <span></span>
         <button class="context-action" type="button" data-athlete-close>Cancelar</button>
-        <button class="context-action primary" type="submit">Guardar deportista</button>
+        <button class="context-action primary" id="saveAthleteBtn" type="submit">Registrar y enviar acceso</button>
       </div>
     </form>
   </dialog>
 
   <dialog class="profile-dialog" id="cloudDialog" aria-labelledby="cloudDialogTitle">
     <div class="cloud-dialog-content">
-      <div class="profile-dialog-head"><div><p class="day-picker-kicker">Sincronización segura</p><h3 id="cloudDialogTitle">Conectar PADRON-LAB con Supabase</h3></div><button class="day-picker-close" id="closeCloudDialog" type="button" aria-label="Cerrar">×</button></div>
+      <div class="profile-dialog-head"><div><p class="day-picker-kicker">Cuenta y datos</p><h3 id="cloudDialogTitle">Configuración y sincronización</h3></div><button class="day-picker-close" id="closeCloudDialog" type="button" aria-label="Cerrar">×</button></div>
       <section class="cloud-section">
-        <h4>1. Proyecto de datos</h4><p>Introduce la URL y la clave pública anon del proyecto. Nunca utilices aquí la clave privada service_role.</p>
-        <div class="cloud-fields"><label class="cloud-wide"><span>URL del proyecto</span><input id="cloudProjectUrl" type="url" placeholder="https://xxxx.supabase.co"></label><label class="cloud-wide"><span>Clave pública anon</span><input id="cloudAnonKey" type="password" autocomplete="off" placeholder="eyJ…"></label></div>
-        <div class="cloud-actions"><button class="context-action" id="clearCloudSettings" type="button">Desconectar proyecto</button><button class="context-action primary" id="saveCloudSettings" type="button">Guardar y conectar</button></div>
-      </section>
-      <section class="cloud-section">
-        <h4>2. Acceso del usuario</h4><p>El entrenador administra perfiles y revisa entradas. El deportista utiliza su correo y el código facilitado en su perfil.</p>
-        <div class="cloud-fields"><label><span>Correo</span><input id="cloudAuthEmail" type="email" autocomplete="email"></label><label><span>Contraseña</span><input id="cloudAuthPassword" type="password" minlength="8" autocomplete="current-password"></label><label><span>Tipo de cuenta al registrarse</span><select id="cloudAuthRole"><option value="trainer">Entrenador</option><option value="athlete">Deportista</option></select></label><label><span>Código de vinculación del deportista</span><input id="cloudClaimCode" type="text" placeholder="Ej. JUG-014"></label></div>
-        <div class="cloud-actions"><button class="context-action" id="cloudSignOut" type="button">Cerrar sesión</button><button class="context-action" id="cloudSignUp" type="button">Crear cuenta</button><button class="context-action primary" id="cloudSignIn" type="button">Entrar y sincronizar</button></div>
+        <h4>Cuenta del entrenador</h4><p>Inicia sesión para mantener perfiles, planes y ejecuciones sincronizados.</p>
+        <div class="cloud-fields"><label><span>Correo</span><input id="cloudAuthEmail" type="email" autocomplete="email"></label><label><span>Contraseña</span><input id="cloudAuthPassword" type="password" minlength="8" autocomplete="current-password"></label></div>
+        <div class="cloud-actions"><button class="context-action" id="cloudSignOut" type="button">Cerrar sesión</button><button class="context-action" id="cloudSignUp" type="button">Crear cuenta de entrenador</button><button class="context-action primary" id="cloudSignIn" type="button">Entrar y sincronizar</button></div>
       </section>
       <div class="cloud-state" id="cloudState">Modo local activo. Configura primero Supabase.</div>
+      <details class="cloud-advanced">
+        <summary>Conexión avanzada <small>solo es necesario configurarla una vez</small></summary>
+        <section class="cloud-section">
+          <h4>Proyecto de datos</h4><p>Utiliza únicamente la URL del proyecto y su clave pública. Nunca introduzcas una clave privada.</p>
+          <div class="cloud-fields"><label class="cloud-wide"><span>URL del proyecto</span><input id="cloudProjectUrl" type="url" placeholder="https://xxxx.supabase.co"></label><label class="cloud-wide"><span>Clave pública</span><input id="cloudAnonKey" type="password" autocomplete="off" placeholder="eyJ…"></label></div>
+          <div class="cloud-actions"><button class="context-action" id="clearCloudSettings" type="button">Desconectar</button><button class="context-action primary" id="saveCloudSettings" type="button">Guardar conexión</button></div>
+        </section>
+      </details>
+      <section class="cloud-section backup-section">
+        <h4>Copia de seguridad</h4><p>Exporta todos los datos o restaura una copia anterior cuando lo necesites.</p>
+        <div class="cloud-actions">
+          <button class="context-action" id="exportBackupBtn" type="button">Exportar copia</button>
+          <button class="context-action" id="importBackupBtn" type="button">Restaurar copia</button>
+          <button class="context-action" id="cloudSettingsBtn" type="button" hidden aria-hidden="true">Abrir configuración</button>
+          <input class="backup-input" id="importBackupFile" type="file" accept="application/json,.json">
+        </div>
+      </section>
     </div>
+  </dialog>
+
+  <dialog class="profile-dialog" id="passwordSetupDialog" aria-labelledby="passwordSetupTitle">
+    <form id="passwordSetupForm">
+      <div class="profile-dialog-head">
+        <div>
+          <p class="day-picker-kicker">Acceso de deportista</p>
+          <h3 id="passwordSetupTitle">Crea tu contraseña</h3>
+        </div>
+      </div>
+      <p class="password-setup-copy">Tu correo ya está confirmado y tu perfil ha quedado vinculado. Elige una contraseña de al menos 8 caracteres para tus próximos accesos.</p>
+      <div class="profile-fields">
+        <label><span>Nueva contraseña *</span><input id="athleteNewPassword" type="password" minlength="8" autocomplete="new-password" required></label>
+        <label><span>Repetir contraseña *</span><input id="athleteConfirmPassword" type="password" minlength="8" autocomplete="new-password" required></label>
+      </div>
+      <p class="profile-invite-state" id="passwordSetupState" role="status">Después entrarás directamente en tu portal de sesiones.</p>
+      <div class="profile-actions">
+        <span></span><span></span><span></span>
+        <button class="context-action primary" id="saveAthletePassword" type="submit">Guardar contraseña y entrar</button>
+      </div>
+    </form>
   </dialog>
 
   <section class="tracking-view-block" id="seguimiento" aria-labelledby="trackingTitle">
     <div class="tracking-inner">
       <div class="tracking-header">
         <div>
-          <p class="section-kicker">Registro local · evolución individual</p>
-          <h2 id="trackingTitle">Analiza la progresión del deportista.</h2>
+          <p class="section-kicker">Seguimiento</p>
+          <h2 id="trackingTitle">Revisa primero; analiza después.</h2>
         </div>
-        <p>Consulta los datos enviados desde el portal, compara lo planificado con lo realizado y analiza la carga, la recuperación previa y el cumplimiento por microciclo o mesociclo.</p>
+        <div class="tracking-header-actions">
+          <p>Consulta los datos enviados, compara lo planificado con lo realizado y analiza la progresión cuando necesites más detalle.</p>
+          <button class="context-action" id="toggleManualEntry" type="button" aria-expanded="false">Registrar ejecución manual</button>
+        </div>
       </div>
 
       <div class="tracking-layout">
-        <aside class="metrics-entry" hidden aria-hidden="true">
+        <aside class="metrics-entry" aria-hidden="true">
           <div class="metrics-entry-head">
-            <span class="section-kicker">Entrada de datos</span>
-            <h3 id="metricsFormTitle">Registrar sesión</h3>
+            <span class="section-kicker">Entrada del entrenador</span>
+            <h3 id="metricsFormTitle">Registrar ejecución manual</h3>
             <p id="metricsAthleteSummary">Selecciona un deportista en la barra superior.</p>
           </div>
           <form id="metricsForm">
@@ -2027,14 +2501,14 @@
             <div class="metrics-form-actions">
               <button class="context-action" id="resetMetricsForm" type="button">Limpiar</button>
               <button class="context-action" id="newExecutionBtn" type="button">+ Nueva ejecución</button>
-              <button class="context-action primary" id="saveMetricsBtn" type="submit">Guardar sesión</button>
+              <button class="context-action primary" id="saveMetricsBtn" type="submit">Guardar ejecución</button>
             </div>
           </form>
         </aside>
 
         <div class="analytics-panel">
           <section class="coach-inbox" aria-labelledby="coachInboxTitle">
-            <div class="coach-inbox-head"><div><span>Entradas del portal</span><strong id="coachInboxTitle">Bandeja del entrenador</strong></div><div class="coach-inbox-tools"><span class="coach-inbox-count" id="coachInboxCount">0</span><select id="coachInboxFilter" aria-label="Filtrar entradas"><option value="new">Nuevas</option><option value="all">Todas</option><option value="reviewed">Revisadas</option></select></div></div>
+            <div class="coach-inbox-head"><div><span>Ejecuciones recibidas</span><strong id="coachInboxTitle">Pendientes de revisión</strong></div><div class="coach-inbox-tools"><span class="coach-inbox-count" id="coachInboxCount">0</span><select id="coachInboxFilter" aria-label="Filtrar entradas"><option value="new">Nuevas</option><option value="all">Todas</option><option value="reviewed">Revisadas</option></select></div></div>
             <div class="coach-inbox-list" id="coachInboxList"></div>
           </section>
           <div class="analytics-empty" id="analyticsNoAthlete" hidden aria-hidden="true"></div>
@@ -2064,12 +2538,16 @@
 
   <section class="athlete-view-block" id="portal-deportista" aria-labelledby="athletePortalTitle">
     <div class="athlete-portal-inner">
+      <aside class="trainer-preview-banner">
+        <div><span>Vista previa del deportista</span><strong>Estás viendo exactamente lo que verá el perfil seleccionado.</strong></div>
+        <button class="context-action" type="button" data-ux-action="back-to-athletes">← Volver a deportistas</button>
+      </aside>
       <div class="athlete-portal-header">
         <div>
-          <p class="section-kicker">Sesión asignada · entrada simplificada</p>
-          <h2 id="athletePortalTitle">Mi sesión y mis datos.</h2>
+          <p class="section-kicker">Próxima sesión</p>
+          <h2 id="athletePortalTitle">Tu entrenamiento, sin distracciones.</h2>
         </div>
-        <p>El deportista ve exactamente la dosis y la carga prescritas por el entrenador. Al guardar, la ejecución aparece de inmediato en Valorar y progresar.</p>
+        <p>Consulta la prescripción, registra lo que realizaste y revisa la información antes de enviarla a tu entrenador.</p>
       </div>
       <div class="athlete-portal-shell">
         <article class="athlete-plan-card">
@@ -2084,9 +2562,9 @@
           </section>
         </article>
         <article class="athlete-entry-card">
-          <div class="athlete-entry-head"><span class="section-kicker">Registrar ejecución</span><h3>¿Qué hiciste realmente?</h3></div>
+          <div class="athlete-entry-head"><span class="section-kicker">Resultado real</span><h3>¿Qué hiciste realmente?</h3></div>
           <form id="athletePortalForm">
-            <p class="athlete-portal-note">Cada envío crea una nueva ejecución de la sesión. Puedes repetir el mismo plan sin sobrescribir registros anteriores.</p>
+            <p class="athlete-portal-note">Tus respuestas se guardan como borrador en este dispositivo hasta que las envíes.</p>
             <div class="metrics-form-grid">
               <label><span>Resultado</span><select id="athleteSessionStatus"><option value="completed">Completada</option><option value="modified">Con cambios</option><option value="partial">Parcial</option><option value="cancelled">Cancelada</option></select></label>
               <label><span>Duración (min)</span><input id="athleteDuration" type="number" min="0" max="300" step="1" required placeholder="75"></label>
@@ -2108,15 +2586,53 @@
               <div class="athlete-strength-host" id="athleteStrengthRows"></div>
             </fieldset>
             <label class="metrics-notes"><span>Comentario para el entrenador</span><textarea id="athleteNotes" rows="3" maxlength="500" placeholder="Cambios, sensaciones o incidencias…"></textarea></label>
-            <div class="metrics-form-actions"><span></span><span></span><button class="context-action primary" id="saveAthleteExecution" type="submit">Enviar ejecución</button></div>
+            <div class="metrics-form-actions"><span></span><span></span><button class="context-action primary" id="saveAthleteExecution" type="submit">Revisar y enviar</button></div>
           </form>
+          <div class="athlete-submit-success" id="athleteSubmitSuccess" hidden role="status">
+            <span>✓</span>
+            <div><strong>Sesión enviada correctamente a tu entrenador</strong><small>La ejecución ya forma parte de tu historial.</small></div>
+            <button class="context-action" id="repeatAthleteExecution" type="button">Registrar otra ejecución</button>
+          </div>
         </article>
       </div>
     </div>
   </section>
 
+  <dialog class="profile-dialog review-dialog" id="coachReviewDialog" aria-labelledby="coachReviewTitle">
+    <form id="coachReviewForm">
+      <div class="profile-dialog-head">
+        <div><p class="day-picker-kicker">Ejecución recibida</p><h3 id="coachReviewTitle">Revisar ejecución</h3></div>
+        <button class="day-picker-close" type="button" data-review-close aria-label="Cerrar">×</button>
+      </div>
+      <input id="coachReviewRecordId" type="hidden">
+      <div class="review-summary" id="coachReviewSummary"></div>
+      <label class="metrics-notes"><span>Nota del entrenador</span><textarea id="coachReviewNote" rows="4" maxlength="600" placeholder="Decisiones, ajustes o aspectos a vigilar…"></textarea></label>
+      <div class="profile-actions">
+        <span></span><span></span>
+        <button class="context-action" type="button" data-review-close>Cancelar</button>
+        <button class="context-action primary" type="submit">Guardar y marcar como revisada</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="profile-dialog athlete-review-dialog" id="athleteSubmitReviewDialog" aria-labelledby="athleteSubmitReviewTitle">
+    <div class="cloud-dialog-content">
+      <div class="profile-dialog-head">
+        <div><p class="day-picker-kicker">Revisión final</p><h3 id="athleteSubmitReviewTitle">Comprueba tu sesión</h3></div>
+        <button class="day-picker-close" type="button" data-athlete-review-close aria-label="Cerrar">×</button>
+      </div>
+      <div class="review-summary" id="athleteSubmitReviewSummary"></div>
+      <p class="profile-privacy">Una vez enviada, aparecerá inmediatamente en la bandeja de tu entrenador.</p>
+      <div class="profile-actions">
+        <span></span><span></span>
+        <button class="context-action" type="button" data-athlete-review-close>Volver y corregir</button>
+        <button class="context-action primary" id="confirmAthleteSubmission" type="button">Confirmar envío</button>
+      </div>
+    </div>
+  </dialog>
+
   <footer class="footer">
-    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.22.2</span>
+    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.23.1 UX</span>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -3646,7 +4162,7 @@
             '<input class="routine-check" type="checkbox" data-routine-check="' + index + '" aria-label="Marcar ' + exercise.name + ' como completado" ' + (item.done ? 'checked' : '') + '>' +
             '<div><span class="goal-tag" data-goal="' + exercise.goal + '">' + goalNames[exercise.goal] + '</span><div class="routine-exercise-name">' + exercise.name + '</div></div>' +
             '<div class="routine-prescription">' +
-              '<input class="routine-dose" data-routine-dose="' + index + '" value="' + item.dose + '" aria-label="Dosis final planificada de ' + exercise.name + '" title="Esta dosis editable será la referencia en Valorar y progresar. Ej.: 7 contactos totales o 3 × 7 contactos.">' +
+              '<input class="routine-dose" data-routine-dose="' + index + '" value="' + item.dose + '" aria-label="Dosis final planificada de ' + exercise.name + '" title="Esta dosis editable será la referencia en Seguimiento. Ej.: 7 contactos totales o 3 × 7 contactos.">' +
               (acceptsLoad ? '<div class="routine-load-wrap ' + (acceptsEffort ? 'has-effort' : '') + '"><input class="routine-load" type="number" min="0" step="0.5" data-routine-load="' + index + '" value="' + loadValue + '" placeholder="Carga" aria-label="Carga prescrita de ' + exercise.name + '"><select class="routine-load-unit" data-routine-load-unit="' + index + '" aria-label="Unidad de la carga prescrita"><option value="kg" ' + (loadUnit === 'kg' ? 'selected' : '') + '>kg</option><option value="%1RM" ' + (loadUnit === '%1RM' ? 'selected' : '') + '>%1RM</option><option value="%BM" ' + (loadUnit === '%BM' ? 'selected' : '') + '>% peso corporal</option><option value="%Vdec" ' + (loadUnit === '%Vdec' ? 'selected' : '') + '>% pérdida velocidad</option></select>' + (acceptsEffort ? '<input class="routine-effort" type="number" min="1" max="10" step="0.5" data-routine-rpe="' + index + '" value="' + targetRpe + '" placeholder="RPE" aria-label="RPE objetivo de ' + exercise.name + '"><input class="routine-effort" type="number" min="0" max="10" step="1" data-routine-rir="' + index + '" value="' + targetRir + '" placeholder="RIR" aria-label="RIR objetivo de ' + exercise.name + '">' : '') + '</div>' : '') +
             '</div>' +
             '<div class="routine-actions">' +
@@ -4108,6 +4624,18 @@
       addToRoutine(event.dataTransfer.getData('text/plain'), state.microcycleId, state.sessionId);
     });
 
+    document.addEventListener('padron:cloudhydrate', function () {
+      const hydratedBuilder = loadBuilder();
+      state.mesocycles = hydratedBuilder.mesocycles;
+      state.microcycles = hydratedBuilder.microcycles;
+      const currentMicrocycle = state.microcycles.find(function (item) { return item.id === state.microcycleId; }) || state.microcycles[0];
+      state.microcycleId = currentMicrocycle.id;
+      state.mesocycleId = currentMicrocycle.mesocycleId;
+      if (!currentMicrocycle.sessions.some(function (item) { return item.id === state.sessionId; })) state.sessionId = currentMicrocycle.sessions[0].id;
+      renderAll();
+      emitBuilderSelection();
+    });
+
     renderAll();
     saveBuilder();
   </script>
@@ -4140,6 +4668,16 @@
         return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
       }
 
+      function makeAthleteCode(name) {
+        const stem = String(name || 'DEP')
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'DEP';
+        let code;
+        do { code = stem + '-' + Math.random().toString(36).slice(2, 6).toUpperCase(); }
+        while (athletes.some(function (item) { return String(item.code || '').toUpperCase() === code; }));
+        return code;
+      }
+
       function escapeHtml(value) {
         return String(value == null ? '' : value)
           .replace(/&/g, '&amp;')
@@ -4166,9 +4704,9 @@
       if (!Array.isArray(athletes)) athletes = [];
       if (!Array.isArray(records)) records = [];
       if (!Array.isArray(plans)) plans = [];
-      let activeContext = readLocal(STORAGE.context, { athleteId: '', view: 'session', routineDay: 'day1' });
+      let activeContext = readLocal(STORAGE.context, { athleteId: '', view: 'home', routineDay: 'day1' });
       if (Object.prototype.hasOwnProperty.call(activeContext, 'date')) delete activeContext.date;
-      if (!['session', 'tracking', 'athlete'].includes(activeContext.view)) activeContext.view = 'session';
+      if (!['home', 'athletes', 'session', 'tracking', 'athlete'].includes(activeContext.view)) activeContext.view = 'home';
       const initialBuilderSelection = typeof builderSelection === 'function' ? builderSelection() : { mesocycleId: 'meso1', mesocycleName: 'Mesociclo 1', microcycleId: 'mc1', sessionId: activeContext.routineDay || 'day1' };
       const restoredBuilderSession = typeof findSession === 'function' ? findSession(activeContext.microcycleId || initialBuilderSelection.microcycleId, activeContext.sessionId || activeContext.routineDay || initialBuilderSelection.sessionId) : null;
       activeContext.mesocycleId = restoredBuilderSession ? restoredBuilderSession.microcycle.mesocycleId : (activeContext.mesocycleId || initialBuilderSelection.mesocycleId);
@@ -4449,11 +4987,24 @@
 
       function openAthleteDialog(athlete) {
         athleteForm.reset();
+        const cloudPanel = document.getElementById('cloudDialog');
+        if (cloudPanel && cloudPanel.open && typeof cloudPanel.close === 'function') cloudPanel.close();
         document.getElementById('athleteEditId').value = athlete ? athlete.id : '';
-        document.getElementById('athleteDialogTitle').textContent = athlete ? 'Editar deportista' : 'Registrar deportista';
+        document.getElementById('athleteDialogTitle').textContent = athlete ? 'Editar deportista' : 'Nuevo deportista';
         document.getElementById('deleteAthleteBtn').hidden = !athlete;
+        const inviteState = document.getElementById('athleteInviteState');
+        const saveButton = document.getElementById('saveAthleteBtn');
+        inviteState.dataset.state = '';
+        inviteState.textContent = athlete
+          ? (athlete.userId ? 'Cuenta vinculada. Los cambios del perfil se sincronizarán sin enviar otro correo.' : 'Acceso pendiente. Guarda los cambios aquí y utiliza “Reenviar invitación” desde su ficha cuando lo necesites.')
+          : 'Al guardar se enviará automáticamente el correo de confirmación y acceso.';
+        if (athlete && athlete.userId) inviteState.dataset.state = 'success';
+        saveButton.textContent = athlete ? 'Guardar cambios' : 'Registrar y enviar acceso';
+        saveButton.disabled = false;
+        saveButton.removeAttribute('aria-busy');
         if (athlete) {
           document.getElementById('athleteName').value = athlete.name || '';
+          document.getElementById('athleteSport').value = athlete.sport || athlete.team || '';
           document.getElementById('athleteCode').value = athlete.code || '';
           document.getElementById('athleteTeam').value = athlete.team || '';
           document.getElementById('athletePosition').value = athlete.position || '';
@@ -4801,7 +5352,7 @@
         const plan = currentPlan();
         const executionNumber = nextExecutionNumber(plan, activeContext.athleteId, activeContext.microcycleId, activeContext.sessionId);
         document.getElementById('metricsFormTitle').textContent = 'Registrar ejecución ' + executionNumber;
-        document.getElementById('saveMetricsBtn').textContent = 'Guardar sesión';
+        document.getElementById('saveMetricsBtn').textContent = 'Guardar ejecución';
         if (keepContext) syncSessionOptions();
         syncExternalFromRoutine();
         updateLiveLoad();
@@ -5027,8 +5578,7 @@
 
       function selectedAthletePlan() {
         const available = athletePlansForActiveProfile();
-        const nextPlan = nextPendingAthletePlan();
-        if (!nextPlan || athletePortalPlanId !== nextPlan.id) return null;
+        if (!athletePortalPlanId) return null;
         return available.find(function (plan) { return plan.id === athletePortalPlanId; }) || null;
       }
 
@@ -5114,25 +5664,36 @@
           renderAthleteHistoryReference();
           return;
         }
+        const availablePlans = athletePlansForActiveProfile();
         const nextPlan = nextPendingAthletePlan();
-        select.innerHTML = nextPlan ? '<option value="' + nextPlan.id + '">' + escapeHtml((nextPlan.mesocycleName ? nextPlan.mesocycleName + ' · ' : '') + (nextPlan.microcycleName ? nextPlan.microcycleName + ' · ' : '') + (nextPlan.sessionName || nextPlan.routineName)) + '</option>' : '<option value="">Sin sesiones pendientes</option>';
+        select.innerHTML = availablePlans.length
+          ? '<option value="">Selecciona una sesión asignada</option>' + availablePlans.map(function (item) {
+              const completed = recordsForPlan(item).length > 0;
+              return '<option value="' + item.id + '">' + escapeHtml((item.mesocycleName ? item.mesocycleName + ' · ' : '') + (item.microcycleName ? item.microcycleName + ' · ' : '') + (item.sessionName || item.routineName) + (completed ? ' · completada' : ' · pendiente')) + '</option>';
+            }).join('')
+          : '<option value="">Sin sesiones asignadas</option>';
         const plan = selectedAthletePlan();
         select.value = plan ? plan.id : '';
         Array.from(form.elements).forEach(function (element) { element.disabled = !plan; });
-        if (!nextPlan) {
-          athletePortalPlanId = '';
+        if (!nextPlan && !plan) {
           nextHost.innerHTML = '<span>Plan al día</span><strong>No quedan sesiones pendientes</strong><small>El historial de pesos permanece disponible como referencia.</small>';
           nextHost.disabled = true;
           nextHost.classList.remove('active');
-          document.getElementById('athletePlanContext').textContent = athletePlansForActiveProfile().length ? 'Has completado todas las sesiones asignadas.' : 'El entrenador todavía no ha asignado sesiones.';
-          host.innerHTML = '<div class="strength-load-empty">No hay una sesión pendiente para completar.</div>';
+          document.getElementById('athletePlanContext').textContent = availablePlans.length ? 'Has completado todas las sesiones asignadas.' : 'Todavía no tienes una sesión pendiente. Tu entrenador te avisará cuando esté disponible.';
+          host.innerHTML = '<div class="strength-load-empty">' + (availablePlans.length ? 'No hay una sesión pendiente. Puedes consultar una sesión completada desde el selector.' : 'Todavía no tienes una sesión pendiente. Tu entrenador te avisará cuando esté disponible.') + '</div>';
           renderAthleteStrengthRows(null);
           renderAthleteHistoryReference();
           return;
         }
-        nextHost.innerHTML = '<span>' + (plan ? 'Sesión preparada' : 'Siguiente sesión pendiente · pulsa para abrir') + '</span><strong>' + escapeHtml(nextPlan.sessionName || nextPlan.routineName) + '</strong><small>' + escapeHtml((nextPlan.mesocycleName ? nextPlan.mesocycleName + ' · ' : '') + (nextPlan.microcycleName || 'Microciclo')) + '</small>';
-        nextHost.disabled = false;
-        nextHost.classList.toggle('active', Boolean(plan));
+        if (nextPlan) {
+          nextHost.innerHTML = '<span>' + (plan && plan.id === nextPlan.id ? 'Sesión preparada' : 'Siguiente sesión pendiente · pulsa para abrir') + '</span><strong>' + escapeHtml(nextPlan.sessionName || nextPlan.routineName) + '</strong><small>' + escapeHtml((nextPlan.mesocycleName ? nextPlan.mesocycleName + ' · ' : '') + (nextPlan.microcycleName || 'Microciclo')) + '</small>';
+          nextHost.disabled = false;
+          nextHost.classList.toggle('active', Boolean(plan && plan.id === nextPlan.id));
+        } else {
+          nextHost.innerHTML = '<span>Plan al día</span><strong>No quedan sesiones pendientes</strong><small>Puedes consultar el historial o repetir una sesión de forma explícita.</small>';
+          nextHost.disabled = true;
+          nextHost.classList.remove('active');
+        }
         if (!plan) {
           document.getElementById('athletePlanContext').textContent = 'Pulsa la siguiente sesión pendiente para abrirla.';
           host.innerHTML = '<div class="strength-load-empty">La sesión se mostrará aquí cuando pulses la tarjeta superior.</div>';
@@ -5503,13 +6064,17 @@
         host.innerHTML = visible.slice(0, 20).map(function (record) {
           const athlete = athleteById(record.athleteId);
           const isNew = record.reviewStatus !== 'reviewed';
+          const submitted = record.updatedAt || record.createdAt;
+          const submittedLabel = submitted ? new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short' }).format(new Date(submitted)) : 'Sin fecha';
+          const recoveryValues = [record.sleepQuality, record.fatigue, record.soreness, record.stress].filter(function (value) { return Number.isFinite(Number(value)); }).map(Number);
+          const recoveryLabel = recoveryValues.length ? (Math.max(Number(record.fatigue) || 0, Number(record.soreness) || 0, Number(record.stress) || 0) >= 4 ? 'Recuperación a vigilar' : 'Recuperación estable') : 'Sin recuperación';
           return '<article class="coach-inbox-row ' + (isNew ? 'is-new' : '') + '">' +
             '<span class="coach-inbox-dot" aria-hidden="true"></span>' +
-            '<div class="coach-inbox-copy"><strong>' + escapeHtml(athlete ? athlete.name : 'Deportista eliminado') + '</strong><span>' + (isNew ? 'Pendiente de revisión' : 'Revisada') + '</span></div>' +
-            '<div class="coach-inbox-copy coach-inbox-session"><strong>' + escapeHtml(record.sessionName || record.routineName || 'Sesión') + '</strong><span>' + escapeHtml((record.mesocycleName ? record.mesocycleName + ' · ' : '') + (record.microcycleName || 'Microciclo') + ' · ejecución ' + (Number(record.executionNumber) || 1)) + '</span></div>' +
+            '<div class="coach-inbox-copy"><strong>' + escapeHtml(athlete ? athlete.name : 'Deportista eliminado') + '</strong><span>' + submittedLabel + ' · ' + (isNew ? 'Pendiente' : 'Revisada') + '</span></div>' +
+            '<div class="coach-inbox-copy coach-inbox-session"><strong>' + escapeHtml(record.sessionName || record.routineName || 'Sesión') + '</strong><span>' + escapeHtml((record.microcycleName || 'Microciclo') + ' · ' + recoveryLabel) + '</span></div>' +
             '<div class="coach-inbox-metric"><strong>' + (record.rpe == null ? '—' : escapeHtml(record.rpe)) + '</strong><span>RPE</span></div>' +
-            '<div class="coach-inbox-metric"><strong>' + Math.round(Number(record.srpeLoad) || 0) + '</strong><span>sRPE</span></div>' +
-            '<div class="coach-inbox-actions"><button type="button" data-inbox-open="' + record.id + '">Abrir</button><button class="review" type="button" data-inbox-review="' + record.id + '">' + (isNew ? 'Marcar revisada' : 'Marcar nueva') + '</button></div>' +
+            '<div class="coach-inbox-metric"><strong>' + Math.round(Number(record.duration) || 0) + '</strong><span>min</span></div>' +
+            '<div class="coach-inbox-actions"><button type="button" data-ux-review-record="' + record.id + '">Revisar ejecución recibida</button><button class="review" type="button" data-inbox-review="' + record.id + '">' + (isNew ? 'Marcar revisada' : 'Marcar nueva') + '</button></div>' +
           '</article>';
         }).join('');
       }
@@ -5685,10 +6250,11 @@
             writeLocal(STORAGE.athletes, payload.athletes);
             writeLocal(STORAGE.plans, payload.plans);
             writeLocal(STORAGE.records, payload.records);
-            const restoredContext = payload.context && typeof payload.context === 'object' ? payload.context : { athleteId: '', view: 'session' };
-            if (!['session', 'tracking', 'athlete'].includes(restoredContext.view)) restoredContext.view = 'session';
+            const restoredContext = payload.context && typeof payload.context === 'object' ? payload.context : { athleteId: '', view: 'home' };
+            if (!['home', 'athletes', 'session', 'tracking', 'athlete'].includes(restoredContext.view)) restoredContext.view = 'home';
             writeLocal(STORAGE.context, restoredContext);
-            window.location.reload();
+            document.dispatchEvent(new CustomEvent('padron:cloudhydrate'));
+            notify('Copia restaurada sin recargar la página.');
           } catch (error) {
             notify('No se pudo restaurar: el archivo no es una copia válida de PADRON-LAB.');
           }
@@ -5711,37 +6277,89 @@
       document.querySelectorAll('[data-athlete-close]').forEach(function (button) { button.addEventListener('click', closeAthleteDialog); });
       athleteDialog.addEventListener('click', function (event) { if (event.target === athleteDialog) closeAthleteDialog(); });
 
-      athleteForm.addEventListener('submit', function (event) {
+      athleteForm.addEventListener('submit', async function (event) {
         event.preventDefault();
         const name = document.getElementById('athleteName').value.trim();
-        if (!name) return;
+        const sport = document.getElementById('athleteSport').value.trim();
+        if (!name || !sport) return;
         const editId = document.getElementById('athleteEditId').value;
         const previousAthlete = athleteById(editId);
+        const email = document.getElementById('athleteEmail').value.trim().toLowerCase();
+        const inviteState = document.getElementById('athleteInviteState');
+        const saveButton = document.getElementById('saveAthleteBtn');
+        if (!email) {
+          inviteState.dataset.state = 'error';
+          inviteState.textContent = 'Introduce el correo del deportista para crear su acceso.';
+          return;
+        }
+        const duplicatedEmail = athletes.find(function (item) { return item.id !== editId && String(item.email || '').toLowerCase() === email; });
+        if (duplicatedEmail) {
+          inviteState.dataset.state = 'error';
+          inviteState.textContent = 'Ese correo ya pertenece al perfil de ' + duplicatedEmail.name + '.';
+          return;
+        }
+        const code = document.getElementById('athleteCode').value.trim() || makeAthleteCode(name);
+        document.getElementById('athleteCode').value = code;
         const athlete = {
           id: editId || uid('athlete'),
           name: name,
-          code: document.getElementById('athleteCode').value.trim(),
+          sport: sport,
+          code: code,
           team: document.getElementById('athleteTeam').value.trim(),
           position: document.getElementById('athletePosition').value.trim(),
-          email: document.getElementById('athleteEmail').value.trim(),
+          email: email,
           pathologies: document.getElementById('athletePathologies').value.trim(),
           injuries: document.getElementById('athleteInjuries').value.trim(),
           characteristics: document.getElementById('athleteCharacteristics').value.trim(),
           goals: document.getElementById('athleteGoals').value.trim(),
+          userId: previousAthlete && previousAthlete.userId ? previousAthlete.userId : undefined,
+          inviteSentAt: previousAthlete && previousAthlete.inviteSentAt ? previousAthlete.inviteSentAt : undefined,
           createdAt: previousAthlete && previousAthlete.createdAt ? previousAthlete.createdAt : new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
-        const existingIndex = athletes.findIndex(function (item) { return item.id === athlete.id; });
-        if (existingIndex >= 0) athletes[existingIndex] = athlete;
-        else athletes.push(athlete);
-        activeContext.athleteId = athlete.id;
-        writeLocal(STORAGE.athletes, athletes);
-        saveContext();
-        closeAthleteDialog();
-        renderAthleteOptions();
-        resetMetricsForm();
-        renderAnalytics();
-        notify(existingIndex >= 0 ? 'Perfil actualizado.' : 'Deportista registrado.');
+        const shouldSendAccess = !previousAthlete;
+        saveButton.disabled = true;
+        saveButton.setAttribute('aria-busy', 'true');
+        inviteState.dataset.state = '';
+        inviteState.textContent = shouldSendAccess ? 'Sincronizando el perfil y enviando el correo de acceso…' : 'Guardando y sincronizando los cambios…';
+        try {
+          let accessResult = null;
+          if (shouldSendAccess) {
+            if (!window.padronCloud || typeof window.padronCloud.registerAthleteAccess !== 'function') throw new Error('La conexión segura todavía no está preparada. Recarga la página y vuelve a intentarlo.');
+            accessResult = await window.padronCloud.registerAthleteAccess(athlete);
+            athlete.inviteSentAt = new Date().toISOString();
+          }
+          const existingIndex = athletes.findIndex(function (item) { return item.id === athlete.id; });
+          if (existingIndex >= 0) athletes[existingIndex] = athlete;
+          else athletes.push(athlete);
+          activeContext.athleteId = athlete.id;
+          writeLocal(STORAGE.athletes, athletes);
+          saveContext();
+          renderAthleteOptions();
+          resetMetricsForm();
+          renderAnalytics();
+          inviteState.dataset.state = 'success';
+          inviteState.textContent = accessResult ? 'Perfil sincronizado. Correo enviado a ' + athlete.email + '.' : 'Perfil actualizado y sincronizado.';
+          notify(accessResult ? 'Deportista registrado y correo de acceso enviado.' : 'Perfil actualizado.');
+          setTimeout(closeAthleteDialog, 550);
+        } catch (error) {
+          if (error && error.profileSynced) {
+            const savedIndex = athletes.findIndex(function (item) { return item.id === athlete.id; });
+            if (savedIndex >= 0) athletes[savedIndex] = athlete;
+            else athletes.push(athlete);
+            activeContext.athleteId = athlete.id;
+            document.getElementById('athleteEditId').value = athlete.id;
+            writeLocal(STORAGE.athletes, athletes);
+            saveContext();
+            renderAthleteOptions();
+            saveButton.textContent = 'Guardar cambios';
+          }
+          inviteState.dataset.state = 'error';
+          inviteState.textContent = error && error.message ? error.message : 'No se pudo completar el registro.';
+        } finally {
+          saveButton.disabled = false;
+          saveButton.removeAttribute('aria-busy');
+        }
       });
 
       document.getElementById('deleteAthleteBtn').addEventListener('click', function () {
@@ -5991,6 +6609,24 @@
         }
       });
 
+      document.addEventListener('padron:cloudhydrate', function () {
+        athletes = readLocal(STORAGE.athletes, []);
+        records = readLocal(STORAGE.records, []);
+        plans = readLocal(STORAGE.plans, []);
+        if (!Array.isArray(athletes)) athletes = [];
+        if (!Array.isArray(records)) records = [];
+        if (!Array.isArray(plans)) plans = [];
+        const hydratedContext = readLocal(STORAGE.context, activeContext);
+        if (hydratedContext && typeof hydratedContext === 'object') activeContext = hydratedContext;
+        if (!['home', 'athletes', 'session', 'tracking', 'athlete'].includes(activeContext.view)) activeContext.view = 'home';
+        renderAthleteOptions();
+        syncSessionOptions();
+        setSharedSession(activeContext.microcycleId, activeContext.sessionId || activeContext.routineDay);
+        resetMetricsForm();
+        setAppView(activeContext.view);
+        renderAnalytics();
+      });
+
       renderAthleteOptions();
       syncSessionOptions();
       setSharedSession(activeContext.microcycleId, activeContext.sessionId || activeContext.routineDay);
@@ -6001,6 +6637,7 @@
   </script>
   <script type="module">
     const CLOUD_SETTINGS_KEY = 'padronlab-cloud-settings-v1';
+    const INVITE_SETUP_KEY = 'padronlab-pending-athlete-invite-v1';
     const DATA_KEYS = {
       athletes: 'padronlab-athletes-v1',
       plans: 'padronlab-session-plans-v1',
@@ -6011,13 +6648,30 @@
     const cloudDialog = document.getElementById('cloudDialog');
     const cloudState = document.getElementById('cloudState');
     const cloudBadge = document.getElementById('cloudStatusBadge');
+    const passwordSetupDialog = document.getElementById('passwordSetupDialog');
+    const passwordSetupState = document.getElementById('passwordSetupState');
     let supabaseClient = null;
+    let supabaseModule = null;
+    let supabaseLoadPromise = null;
     let cloudSession = null;
     let cloudProfile = null;
     let linkedAthlete = null;
     let cloudSyncTimer = null;
     let cloudHydrating = false;
     let realtimeChannel = null;
+
+    (function rememberAthleteInvite() {
+      const url = new URL(window.location.href);
+      const claimCode = url.searchParams.get('claim');
+      if (url.searchParams.get('padronInvite') === 'athlete' && claimCode) {
+        const projectUrl = (url.searchParams.get('cloudUrl') || '').replace(/\/$/, '');
+        const publicKey = url.searchParams.get('cloudKey') || '';
+        if (/^https:\/\/.+\.supabase\.co$/.test(projectUrl) && publicKey.length >= 40) {
+          localStorage.setItem(CLOUD_SETTINGS_KEY, JSON.stringify({ url: projectUrl, anonKey: publicKey }));
+        }
+        localStorage.setItem(INVITE_SETUP_KEY, JSON.stringify({ claimCode: claimCode, createdAt: new Date().toISOString() }));
+      }
+    })();
 
     function cloudSettings() {
       try { return JSON.parse(localStorage.getItem(CLOUD_SETTINGS_KEY) || 'null') || {}; } catch (error) { return {}; }
@@ -6026,6 +6680,12 @@
     function cloudMessage(message, isError) {
       cloudState.textContent = message;
       cloudState.style.borderLeftColor = isError ? '#e63b2e' : '#ff7a00';
+      if (isError) setCloudBadge('Error de sincronización', 'error');
+    }
+
+    function setCloudBadge(label, state) {
+      cloudBadge.textContent = label;
+      cloudBadge.dataset.syncState = state || 'local';
     }
 
     function localArray(key) {
@@ -6048,11 +6708,16 @@
 
     async function loadSupabase() {
       if (supabaseClient) return supabaseClient;
+      if (supabaseLoadPromise) return supabaseLoadPromise;
       const settings = cloudSettings();
       if (!settings.url || !settings.anonKey) throw new Error('Configura la URL y la clave pública anon.');
-      const module = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
-      supabaseClient = module.createClient(settings.url, settings.anonKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'padronlab-cloud-auth' } });
-      return supabaseClient;
+      supabaseLoadPromise = (async function () {
+        supabaseModule = supabaseModule || await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+        supabaseClient = supabaseModule.createClient(settings.url, settings.anonKey, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'padronlab-cloud-auth' } });
+        return supabaseClient;
+      })();
+      try { return await supabaseLoadPromise; }
+      catch (error) { supabaseLoadPromise = null; throw error; }
     }
 
     async function fetchCloudProfile() {
@@ -6062,6 +6727,103 @@
       cloudProfile = response.data;
       document.body.dataset.cloudRole = cloudProfile ? cloudProfile.role : '';
       return cloudProfile;
+    }
+
+    function pendingAthleteInvite() {
+      try { return JSON.parse(localStorage.getItem(INVITE_SETUP_KEY) || 'null'); } catch (error) { return null; }
+    }
+
+    function athleteInviteRedirect(code) {
+      const url = new URL(window.location.origin + window.location.pathname);
+      const settings = cloudSettings();
+      url.searchParams.set('padronInvite', 'athlete');
+      url.searchParams.set('claim', code);
+      url.searchParams.set('cloudUrl', settings.url);
+      url.searchParams.set('cloudKey', settings.anonKey);
+      return url.toString();
+    }
+
+    function temporaryPassword() {
+      const bytes = window.crypto.getRandomValues(new Uint8Array(24));
+      return Array.from(bytes, function (value) { return (value % 36).toString(36); }).join('') + 'Aa1!';
+    }
+
+    async function ensureTrainerAccess() {
+      await loadSupabase();
+      const sessionResult = await supabaseClient.auth.getSession();
+      if (sessionResult.error) throw sessionResult.error;
+      cloudSession = sessionResult.data.session;
+      if (!cloudSession) throw new Error('Inicia sesión como entrenador una vez desde Nube antes de registrar deportistas.');
+      await fetchCloudProfile();
+      if (!cloudProfile || cloudProfile.role !== 'trainer') throw new Error('Solo una cuenta de entrenador puede registrar y enviar accesos a deportistas.');
+      return cloudSession;
+    }
+
+    async function registerAthleteAccess(athlete) {
+      if (!athlete || !athlete.id || !athlete.email || !athlete.code) throw new Error('Completa el nombre y el correo del deportista.');
+      await ensureTrainerAccess();
+      const athleteRow = {
+        id: athlete.id,
+        coach_id: cloudSession.user.id,
+        code: athlete.code,
+        email: athlete.email,
+        payload: athlete,
+        updated_at: new Date().toISOString()
+      };
+      const saved = await supabaseClient.from('athletes').upsert(athleteRow, { onConflict: 'id' });
+      if (saved.error) throw saved.error;
+
+      const settings = cloudSettings();
+      const inviteClient = supabaseModule.createClient(settings.url, settings.anonKey, {
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+      });
+      const redirectTo = athleteInviteRedirect(athlete.code);
+      let needsPasswordEmail = false;
+      try {
+        const signUp = await inviteClient.auth.signUp({
+          email: athlete.email,
+          password: temporaryPassword(),
+          options: {
+            emailRedirectTo: redirectTo,
+            data: { role: 'athlete', display_name: athlete.name, athlete_id: athlete.id, claim_code: athlete.code }
+          }
+        });
+        if (signUp.error) {
+          if (/already|registered|exists/i.test(signUp.error.message || '')) needsPasswordEmail = true;
+          else throw signUp.error;
+        } else {
+          const identities = signUp.data && signUp.data.user && signUp.data.user.identities;
+          needsPasswordEmail = Boolean(signUp.data && signUp.data.session) || (Array.isArray(identities) && identities.length === 0);
+        }
+        if (needsPasswordEmail) {
+          const recovery = await inviteClient.auth.resetPasswordForEmail(athlete.email, { redirectTo: redirectTo });
+          if (recovery.error) throw recovery.error;
+        }
+      } catch (error) {
+        const wrapped = new Error('El perfil se ha sincronizado, pero no se pudo enviar el correo: ' + (error && error.message ? error.message : 'error desconocido') + '. Pulsa de nuevo Guardar y reenviar acceso.');
+        wrapped.profileSynced = true;
+        throw wrapped;
+      }
+      return { email: athlete.email, mode: needsPasswordEmail ? 'password' : 'confirmation' };
+    }
+
+    async function claimPendingAthleteInvite() {
+      const pending = pendingAthleteInvite();
+      if (!pending || !pending.claimCode || !cloudSession || !cloudProfile || cloudProfile.role !== 'athlete') return false;
+      const current = await supabaseClient.from('athletes').select('id').eq('user_id', cloudSession.user.id).maybeSingle();
+      if (current.error) throw current.error;
+      if (current.data) return true;
+      const claim = await supabaseClient.rpc('claim_athlete_profile', { p_code: pending.claimCode });
+      if (claim.error) throw claim.error;
+      return true;
+    }
+
+    function showPasswordSetupIfNeeded() {
+      if (!pendingAthleteInvite() || !cloudSession || !cloudProfile || cloudProfile.role !== 'athlete') return;
+      if (cloudDialog.open) cloudDialog.close();
+      const athletePanel = document.getElementById('athleteDialog');
+      if (athletePanel && athletePanel.open && typeof athletePanel.close === 'function') athletePanel.close();
+      if (!passwordSetupDialog.open) passwordSetupDialog.showModal();
     }
 
     function rowPayload(row) {
@@ -6096,7 +6858,7 @@
       if (athleteResult.error) throw athleteResult.error;
       if (!athleteResult.data) {
         linkedAthlete = null;
-        cloudMessage('Cuenta creada, pero todavía no está vinculada. Introduce el código del perfil y pulsa Entrar y sincronizar.', true);
+        cloudMessage('La cuenta está activa, pero no se ha encontrado el perfil asignado a este correo. Abre de nuevo el enlace recibido o contacta con tu entrenador.', true);
         return false;
       }
       linkedAthlete = athleteResult.data;
@@ -6124,7 +6886,7 @@
       cloudHydrating = true;
       try {
         const changed = cloudProfile.role === 'athlete' ? await hydrateAthlete() : await hydrateTrainer();
-        cloudBadge.textContent = cloudProfile.role === 'athlete' ? 'Nube · deportista' : 'Nube · entrenador';
+        setCloudBadge('Sincronizado', 'synced');
         cloudMessage('Sincronización activa como ' + (cloudProfile.role === 'athlete' ? 'deportista.' : 'entrenador.'));
         if (changed) document.dispatchEvent(new CustomEvent('padron:cloudhydrate'));
       } finally { cloudHydrating = false; }
@@ -6190,12 +6952,17 @@
     function scheduleCloudSync() {
       if (!cloudSession || !cloudProfile) return;
       clearTimeout(cloudSyncTimer);
+      setCloudBadge('Guardando…', 'saving');
       cloudSyncTimer = setTimeout(async function () {
         try {
           if (cloudProfile.role === 'trainer') await syncTrainerData();
           else await syncAthleteRecords();
+          setCloudBadge('Sincronizado', 'synced');
           cloudMessage('Cambios sincronizados correctamente.');
-        } catch (error) { cloudMessage('No se pudo sincronizar: ' + error.message, true); }
+        } catch (error) {
+          setCloudBadge('Error de sincronización', 'error');
+          cloudMessage('No se pudo sincronizar: ' + error.message, true);
+        }
       }, 450);
     }
 
@@ -6204,25 +6971,28 @@
       document.getElementById('cloudProjectUrl').value = settings.url || '';
       document.getElementById('cloudAnonKey').value = settings.anonKey || '';
       if (!settings.url || !settings.anonKey) {
-        cloudBadge.textContent = 'Guardado local';
+        setCloudBadge('Modo local', 'local');
         return;
       }
       try {
+        setCloudBadge('Conectando…', 'saving');
         await loadSupabase();
         const sessionResult = await supabaseClient.auth.getSession();
         if (sessionResult.error) throw sessionResult.error;
         cloudSession = sessionResult.data.session;
         if (!cloudSession) {
-          cloudBadge.textContent = 'Nube sin sesión';
+          setCloudBadge('Sin conexión', 'offline');
           cloudMessage('Proyecto conectado. Entra o crea una cuenta para sincronizar.');
           return;
         }
         await fetchCloudProfile();
         if (!cloudProfile) throw new Error('No se encontró el perfil de acceso. Ejecuta primero el esquema SQL incluido.');
+        if (cloudProfile.role === 'athlete') await claimPendingAthleteInvite();
         subscribeRealtime();
         await hydrateCloud();
+        showPasswordSetupIfNeeded();
       } catch (error) {
-        cloudBadge.textContent = 'Error de nube';
+        setCloudBadge('Error de sincronización', 'error');
         cloudMessage(error.message, true);
         if (!options || !options.silent) cloudDialog.showModal();
       }
@@ -6232,6 +7002,9 @@
       const settings = cloudSettings();
       document.getElementById('cloudProjectUrl').value = settings.url || '';
       document.getElementById('cloudAnonKey').value = settings.anonKey || '';
+      const athletePanel = document.getElementById('athleteDialog');
+      if (athletePanel && athletePanel.open && typeof athletePanel.close === 'function') athletePanel.close();
+      if (passwordSetupDialog.open) passwordSetupDialog.close();
       cloudDialog.showModal();
     });
     document.getElementById('closeCloudDialog').addEventListener('click', function () { cloudDialog.close(); });
@@ -6245,6 +7018,7 @@
       }
       localStorage.setItem(CLOUD_SETTINGS_KEY, JSON.stringify({ url: url, anonKey: anonKey }));
       supabaseClient = null;
+      supabaseLoadPromise = null;
       await connectCloud({ silent: false });
     });
     document.getElementById('clearCloudSettings').addEventListener('click', async function () {
@@ -6252,9 +7026,9 @@
       if (supabaseClient && realtimeChannel) await supabaseClient.removeChannel(realtimeChannel);
       localStorage.removeItem(CLOUD_SETTINGS_KEY);
       localStorage.removeItem('padronlab-cloud-auth');
-      supabaseClient = null; cloudSession = null; cloudProfile = null; linkedAthlete = null; realtimeChannel = null;
+      supabaseClient = null; supabaseLoadPromise = null; cloudSession = null; cloudProfile = null; linkedAthlete = null; realtimeChannel = null;
       delete document.body.dataset.cloudRole;
-      cloudBadge.textContent = 'Guardado local';
+      setCloudBadge('Modo local', 'local');
       cloudMessage('Proyecto desconectado. Los datos locales se conservan.');
     });
     document.getElementById('cloudSignUp').addEventListener('click', async function () {
@@ -6262,20 +7036,12 @@
         await loadSupabase();
         const email = document.getElementById('cloudAuthEmail').value.trim();
         const password = document.getElementById('cloudAuthPassword').value;
-        const role = document.getElementById('cloudAuthRole').value;
-        const result = await supabaseClient.auth.signUp({ email: email, password: password, options: { data: { role: role } } });
+        const result = await supabaseClient.auth.signUp({ email: email, password: password, options: { data: { role: 'trainer' } } });
         if (result.error) throw result.error;
         cloudSession = result.data.session;
-        cloudMessage(cloudSession ? 'Cuenta creada. Preparando la sincronización…' : 'Cuenta creada. Confirma el correo y después inicia sesión.');
+        cloudMessage(cloudSession ? 'Cuenta de entrenador creada. Preparando la sincronización…' : 'Cuenta de entrenador creada. Confirma el correo y después inicia sesión.');
         if (cloudSession) {
           await fetchCloudProfile();
-          if (role === 'athlete') {
-            const code = document.getElementById('cloudClaimCode').value.trim();
-            if (code) {
-              const claim = await supabaseClient.rpc('claim_athlete_profile', { p_code: code });
-              if (claim.error) throw claim.error;
-            }
-          }
           subscribeRealtime();
           await hydrateCloud();
         }
@@ -6288,28 +7054,427 @@
         if (result.error) throw result.error;
         cloudSession = result.data.session;
         await fetchCloudProfile();
-        if (cloudProfile && cloudProfile.role === 'athlete') {
-          const code = document.getElementById('cloudClaimCode').value.trim();
-          if (code) {
-            const claim = await supabaseClient.rpc('claim_athlete_profile', { p_code: code });
-            if (claim.error) throw claim.error;
-          }
-        }
+        if (cloudProfile && cloudProfile.role === 'athlete') await claimPendingAthleteInvite();
         subscribeRealtime();
         await hydrateCloud();
+        showPasswordSetupIfNeeded();
       } catch (error) { cloudMessage(error.message, true); }
+    });
+
+    document.getElementById('passwordSetupForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const password = document.getElementById('athleteNewPassword').value;
+      const confirmation = document.getElementById('athleteConfirmPassword').value;
+      const saveButton = document.getElementById('saveAthletePassword');
+      passwordSetupState.dataset.state = '';
+      if (password.length < 8) {
+        passwordSetupState.dataset.state = 'error';
+        passwordSetupState.textContent = 'La contraseña debe tener al menos 8 caracteres.';
+        return;
+      }
+      if (password !== confirmation) {
+        passwordSetupState.dataset.state = 'error';
+        passwordSetupState.textContent = 'Las dos contraseñas no coinciden.';
+        return;
+      }
+      saveButton.disabled = true;
+      saveButton.setAttribute('aria-busy', 'true');
+      passwordSetupState.textContent = 'Guardando la contraseña y preparando tu portal…';
+      try {
+        await loadSupabase();
+        const updated = await supabaseClient.auth.updateUser({ password: password });
+        if (updated.error) throw updated.error;
+        await claimPendingAthleteInvite();
+        await hydrateCloud();
+        localStorage.removeItem(INVITE_SETUP_KEY);
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete('padronInvite');
+        cleanUrl.searchParams.delete('claim');
+        cleanUrl.searchParams.delete('cloudUrl');
+        cleanUrl.searchParams.delete('cloudKey');
+        window.history.replaceState({}, document.title, cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
+        passwordSetupState.dataset.state = 'success';
+        passwordSetupState.textContent = 'Contraseña guardada. Ya puedes acceder a tus sesiones.';
+        setTimeout(function () { passwordSetupDialog.close(); }, 650);
+      } catch (error) {
+        passwordSetupState.dataset.state = 'error';
+        passwordSetupState.textContent = error && error.message ? error.message : 'No se pudo guardar la contraseña.';
+      } finally {
+        saveButton.disabled = false;
+        saveButton.removeAttribute('aria-busy');
+      }
     });
     document.getElementById('cloudSignOut').addEventListener('click', async function () {
       if (supabaseClient) await supabaseClient.auth.signOut();
       if (supabaseClient && realtimeChannel) await supabaseClient.removeChannel(realtimeChannel);
       cloudSession = null; cloudProfile = null; linkedAthlete = null; realtimeChannel = null;
       delete document.body.dataset.cloudRole;
-      cloudBadge.textContent = cloudSettings().url ? 'Nube sin sesión' : 'Guardado local';
+      setCloudBadge(cloudSettings().url ? 'Sin conexión' : 'Modo local', cloudSettings().url ? 'offline' : 'local');
       cloudMessage('Sesión cerrada. Los datos locales permanecen en este dispositivo.');
     });
     document.addEventListener('padron:datachange', scheduleCloudSync);
     document.addEventListener('padron:builderchange', scheduleCloudSync);
+    window.padronCloud = { registerAthleteAccess: registerAthleteAccess };
     connectCloud({ silent: true });
+  </script>
+  <script>
+    (function () {
+      const UX_KEYS = {
+        athletes: 'padronlab-athletes-v1',
+        records: 'padronlab-training-records-v1',
+        plans: 'padronlab-session-plans-v1',
+        context: 'padronlab-active-context-v1'
+      };
+      const athleteSelectUx = document.getElementById('globalAthleteSelect');
+      const directoryHost = document.getElementById('athleteDirectoryList');
+      const directorySearch = document.getElementById('athleteDirectorySearch');
+      const coachReviewDialog = document.getElementById('coachReviewDialog');
+      const athleteReviewDialog = document.getElementById('athleteSubmitReviewDialog');
+      const athletePortalFormUx = document.getElementById('athletePortalForm');
+      const athleteSubmitButton = document.getElementById('saveAthleteExecution');
+      const athleteSubmitSuccess = document.getElementById('athleteSubmitSuccess');
+      let athleteSubmissionConfirmed = false;
+      let athleteSubmissionLocked = false;
+      let lastSubmittedPlanId = '';
+      let shellRenderTimer = null;
+
+      function uxRead(key, fallback) {
+        try {
+          const value = JSON.parse(localStorage.getItem(key) || 'null');
+          return value === null ? fallback : value;
+        } catch (error) { return fallback; }
+      }
+      function uxWrite(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+        document.dispatchEvent(new CustomEvent('padron:datachange', { detail: { key: key } }));
+      }
+      function uxEscape(value) {
+        return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      }
+      function uxDate(value) {
+        if (!value) return 'Sin registro';
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return 'Sin registro';
+        return new Intl.DateTimeFormat('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).format(parsed);
+      }
+      function uxToast(message) {
+        if (typeof window.showToast === 'function') window.showToast(message);
+        else {
+          const toast = document.getElementById('toast');
+          if (!toast) return;
+          toast.textContent = message; toast.classList.add('show');
+          setTimeout(function () { toast.classList.remove('show'); }, 2200);
+        }
+      }
+      function closeOtherDialogs(target) {
+        document.querySelectorAll('dialog[open]').forEach(function (dialog) {
+          if (dialog === target) return;
+          try { dialog.close(); } catch (error) { dialog.removeAttribute('open'); }
+        });
+      }
+      if (window.HTMLDialogElement && window.HTMLDialogElement.prototype.showModal) {
+        const nativeShowModal = window.HTMLDialogElement.prototype.showModal;
+        window.HTMLDialogElement.prototype.showModal = function () {
+          closeOtherDialogs(this);
+          if (!this.open) nativeShowModal.call(this);
+        };
+      }
+      function setUxView(view) {
+        const button = document.querySelector('[data-app-view-target="' + view + '"]');
+        if (button) button.click();
+        else document.body.dataset.appView = view;
+        renderUxShell();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      function selectUxAthlete(athleteId) {
+        athleteSelectUx.value = athleteId || '';
+        athleteSelectUx.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      function recordMatchesPlan(record, plan) {
+        if (record.planId && plan.id) return record.planId === plan.id;
+        return record.athleteId === plan.athleteId && record.microcycleId === plan.microcycleId &&
+          (record.sessionId || record.routineDay) === (plan.sessionId || plan.routineDay);
+      }
+      function accessState(athlete) {
+        if (athlete.userId) return { key: 'active', label: 'Cuenta activa' };
+        if (!athlete.email) return { key: 'missing', label: 'Sin correo' };
+        if (athlete.inviteError) return { key: 'error', label: 'Error en invitación' };
+        if (athlete.inviteSentAt) return { key: 'pending', label: 'Invitación pendiente' };
+        return { key: 'pending', label: 'Acceso por enviar' };
+      }
+      function athleteInitials(name) {
+        return String(name || 'D').trim().split(/\s+/).slice(0, 2).map(function (part) { return part.charAt(0); }).join('').toUpperCase() || 'D';
+      }
+      function renderDashboard(athletes, records, plans) {
+        const received = records.filter(function (record) { return record.source === 'athlete' && record.reviewStatus !== 'reviewed'; });
+        const pendingInvites = athletes.filter(function (athlete) { return !athlete.userId && Boolean(athlete.email); });
+        document.getElementById('dashboardAthleteCount').textContent = athletes.length;
+        document.getElementById('dashboardReviewCount').textContent = received.length;
+        document.getElementById('dashboardInviteCount').textContent = pendingInvites.length;
+        document.getElementById('dashboardPlanCount').textContent = plans.length;
+        const items = [];
+        received.slice(0, 3).forEach(function (record) {
+          const athlete = athletes.find(function (item) { return item.id === record.athleteId; });
+          items.push({ tone: 'orange', title: (athlete ? athlete.name : 'Deportista') + ' · ' + (record.sessionName || record.routineName || 'Sesión'), detail: 'Ejecución recibida · RPE ' + (record.rpe == null ? '—' : record.rpe) + ' · ' + (record.duration || 0) + ' min', action: 'review-record', id: record.id, label: 'Revisar' });
+        });
+        pendingInvites.slice(0, Math.max(0, 4 - items.length)).forEach(function (athlete) {
+          items.push({ tone: 'orange', title: athlete.name, detail: athlete.inviteSentAt ? 'Invitación enviada · pendiente de confirmación' : 'El acceso todavía no se ha enviado', action: 'open-athlete', id: athlete.id, label: 'Abrir' });
+        });
+        if (!items.length && athletes.length) items.push({ tone: 'green', title: 'Todo al día', detail: 'No hay ejecuciones ni accesos pendientes.', action: 'open-athletes', id: '', label: 'Ver perfiles' });
+        const host = document.getElementById('dashboardPendingList');
+        host.innerHTML = items.length ? items.map(function (item) {
+          return '<div class="pending-item" data-tone="' + item.tone + '"><i></i><div><strong>' + uxEscape(item.title) + '</strong><small>' + uxEscape(item.detail) + '</small></div><button type="button" data-dashboard-action="' + item.action + '" data-dashboard-id="' + uxEscape(item.id) + '">' + item.label + '</button></div>';
+        }).join('') : '<div class="dashboard-empty">Empieza creando tu primer deportista. El alta y el correo de acceso se completan en el mismo paso.</div>';
+      }
+      function renderDirectory(athletes, records, plans) {
+        const query = String(directorySearch.value || '').trim().toLocaleLowerCase('es');
+        const filtered = athletes.slice().sort(function (a, b) { return String(a.name || '').localeCompare(String(b.name || ''), 'es'); }).filter(function (athlete) {
+          return !query || [athlete.name, athlete.email, athlete.team, athlete.position, athlete.sport].join(' ').toLocaleLowerCase('es').includes(query);
+        });
+        document.getElementById('athleteDirectoryCount').textContent = filtered.length + (filtered.length === 1 ? ' deportista' : ' deportistas');
+        if (!filtered.length) {
+          directoryHost.innerHTML = athletes.length
+            ? '<div class="athlete-directory-empty"><strong>No hay coincidencias</strong>Prueba con otro nombre, correo, equipo o disciplina.</div>'
+            : '<div class="athlete-directory-empty"><strong>Todavía no hay deportistas</strong>Crea el primero y se enviará su acceso automáticamente.<br><button class="context-action primary" type="button" data-ux-action="new-athlete">+ Nuevo deportista</button></div>';
+          return;
+        }
+        directoryHost.innerHTML = filtered.map(function (athlete) {
+          const status = accessState(athlete);
+          const athleteRecords = records.filter(function (record) { return record.athleteId === athlete.id; }).sort(function (a, b) { return String(b.updatedAt || b.createdAt || '').localeCompare(String(a.updatedAt || a.createdAt || '')); });
+          const athletePlans = plans.filter(function (plan) { return plan.athleteId === athlete.id; });
+          const nextPlan = athletePlans.find(function (plan) { return !records.some(function (record) { return recordMatchesPlan(record, plan); }); });
+          const resend = status.key !== 'active' && athlete.email ? '<button type="button" data-athlete-action="resend" data-athlete-id="' + athlete.id + '">Reenviar invitación</button>' : '';
+          return '<article class="athlete-directory-card"><div class="athlete-directory-head"><span class="athlete-avatar">' + uxEscape(athleteInitials(athlete.name)) + '</span><div><strong>' + uxEscape(athlete.name) + '</strong><small>' + uxEscape([athlete.sport, athlete.team, athlete.position].filter(Boolean).join(' · ') || athlete.email || 'Sin datos deportivos') + '</small></div><span class="access-status" data-state="' + status.key + '">' + status.label + '</span></div><div class="athlete-directory-meta"><span><small>Última ejecución</small><strong>' + uxEscape(athleteRecords.length ? (athleteRecords[0].sessionName || athleteRecords[0].routineName || 'Sesión') + ' · ' + uxDate(athleteRecords[0].updatedAt || athleteRecords[0].createdAt) : 'Sin ejecuciones') + '</strong></span><span><small>Próxima sesión</small><strong>' + uxEscape(nextPlan ? (nextPlan.sessionName || nextPlan.routineName || 'Sesión asignada') : 'Sin sesión pendiente') + '</strong></span></div><div class="athlete-directory-actions"><button type="button" data-athlete-action="edit" data-athlete-id="' + athlete.id + '">Editar</button><button type="button" data-athlete-action="plan" data-athlete-id="' + athlete.id + '">Planificar</button><button type="button" data-athlete-action="tracking" data-athlete-id="' + athlete.id + '">Seguimiento</button><button type="button" data-athlete-action="preview" data-athlete-id="' + athlete.id + '">Vista del deportista</button>' + resend + '</div></article>';
+        }).join('');
+      }
+      function currentBuilderSummary() {
+        const mesocycle = document.getElementById('mesocycleSelect');
+        const microcycle = document.getElementById('microcycleSelect');
+        const sessionName = document.getElementById('routineNameInput');
+        return {
+          mesocycle: mesocycle && mesocycle.selectedIndex >= 0 ? mesocycle.options[mesocycle.selectedIndex].textContent : '—',
+          microcycle: microcycle && microcycle.selectedIndex >= 0 ? microcycle.options[microcycle.selectedIndex].textContent : '—',
+          session: sessionName ? sessionName.value : '—',
+          exerciseCount: document.querySelectorAll('#routineContent .routine-item').length
+        };
+      }
+      function renderPlanningGuide(athletes, plans) {
+        const selectedAthlete = athletes.find(function (athlete) { return athlete.id === athleteSelectUx.value; });
+        const builder = currentBuilderSummary();
+        const context = uxRead(UX_KEYS.context, {});
+        const assigned = plans.some(function (plan) {
+          return plan.athleteId === (selectedAthlete && selectedAthlete.id) && plan.microcycleId === context.microcycleId &&
+            (plan.sessionId || plan.routineDay) === (context.sessionId || context.routineDay);
+        });
+        document.getElementById('planningAthleteSummary').textContent = selectedAthlete ? selectedAthlete.name : 'Sin seleccionar';
+        document.getElementById('planningMesocycleSummary').textContent = builder.mesocycle;
+        document.getElementById('planningMicrocycleSummary').textContent = builder.microcycle;
+        document.getElementById('planningSessionSummary').textContent = builder.session;
+        document.getElementById('planningStateSummary').textContent = assigned ? 'Asignada' : 'Borrador';
+        let currentStep = 'athlete';
+        if (selectedAthlete && !builder.exerciseCount) currentStep = 'exercise';
+        if (selectedAthlete && builder.exerciseCount) currentStep = 'assign';
+        document.querySelectorAll('[data-planning-step]').forEach(function (button) {
+          const key = button.dataset.planningStep;
+          button.removeAttribute('aria-current');
+          button.dataset.complete = String((key === 'athlete' && Boolean(selectedAthlete)) || (['mesocycle', 'microcycle', 'session'].includes(key) && Boolean(selectedAthlete)) || (key === 'exercise' && builder.exerciseCount > 0) || (key === 'assign' && assigned));
+          if (key === currentStep) button.setAttribute('aria-current', 'step');
+        });
+        document.getElementById('planningGuideStatus').textContent = !selectedAthlete ? 'Empieza seleccionando un deportista.' : !builder.exerciseCount ? 'La estructura está preparada. Añade los ejercicios de la sesión.' : assigned ? 'La sesión está asignada. Puedes revisarla o continuar con otra.' : 'Revisa objetivo, dosis y ejercicios antes de asignar.';
+      }
+      function renderUxShell() {
+        const athletes = uxRead(UX_KEYS.athletes, []);
+        const records = uxRead(UX_KEYS.records, []);
+        const plans = uxRead(UX_KEYS.plans, []);
+        renderDashboard(Array.isArray(athletes) ? athletes : [], Array.isArray(records) ? records : [], Array.isArray(plans) ? plans : []);
+        renderDirectory(Array.isArray(athletes) ? athletes : [], Array.isArray(records) ? records : [], Array.isArray(plans) ? plans : []);
+        renderPlanningGuide(Array.isArray(athletes) ? athletes : [], Array.isArray(plans) ? plans : []);
+      }
+      function scheduleShellRender() { clearTimeout(shellRenderTimer); shellRenderTimer = setTimeout(renderUxShell, 20); }
+      function performUxAction(action) {
+        if (action === 'new-athlete') { if (document.body.dataset.appView !== 'athletes') setUxView('athletes'); document.getElementById('addAthleteBtn').click(); }
+        else if (action === 'plan-session') { setUxView('session'); setTimeout(function () { document.querySelector('.planning-guide').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); }
+        else if (action === 'review-records') { setUxView('tracking'); setTimeout(function () { document.querySelector('.coach-inbox').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80); }
+        else if (action === 'open-athletes' || action === 'back-to-athletes') setUxView('athletes');
+      }
+      async function resendAthleteInvitation(athleteId, trigger) {
+        const athletes = uxRead(UX_KEYS.athletes, []);
+        const athlete = athletes.find(function (item) { return item.id === athleteId; });
+        if (!athlete || !athlete.email || !window.padronCloud || typeof window.padronCloud.registerAthleteAccess !== 'function') { uxToast('No se pudo preparar el reenvío. Comprueba la sincronización.'); return; }
+        if (trigger.dataset.busy === 'true') return;
+        trigger.dataset.busy = 'true'; trigger.disabled = true;
+        const previousLabel = trigger.textContent; trigger.textContent = 'Enviando…';
+        try {
+          await window.padronCloud.registerAthleteAccess(athlete);
+          athlete.inviteSentAt = new Date().toISOString(); delete athlete.inviteError; athlete.updatedAt = new Date().toISOString();
+          uxWrite(UX_KEYS.athletes, athletes); document.dispatchEvent(new CustomEvent('padron:cloudhydrate'));
+          uxToast('Invitación reenviada a ' + athlete.email + '.');
+        } catch (error) {
+          athlete.inviteError = error && error.message ? error.message : 'No se pudo enviar'; uxWrite(UX_KEYS.athletes, athletes);
+          uxToast('No se pudo reenviar la invitación.');
+        } finally {
+          trigger.dataset.busy = 'false'; trigger.disabled = false; trigger.textContent = previousLabel; renderUxShell();
+        }
+      }
+      function openCoachReview(recordId) {
+        const records = uxRead(UX_KEYS.records, []);
+        const athletes = uxRead(UX_KEYS.athletes, []);
+        const record = records.find(function (item) { return item.id === recordId; });
+        if (!record) return;
+        const athlete = athletes.find(function (item) { return item.id === record.athleteId; });
+        document.getElementById('coachReviewRecordId').value = record.id;
+        document.getElementById('coachReviewTitle').textContent = (athlete ? athlete.name + ' · ' : '') + (record.sessionName || record.routineName || 'Ejecución');
+        document.getElementById('coachReviewNote').value = record.coachNote || '';
+        const planned = record.plannedMetrics || {};
+        const recovery = [record.sleepHours == null ? '' : record.sleepHours + ' h de sueño', record.fatigue == null ? '' : 'fatiga ' + record.fatigue + '/5', record.soreness == null ? '' : 'dolor ' + record.soreness + '/5', record.stress == null ? '' : 'estrés ' + record.stress + '/5'].filter(Boolean).join(' · ') || 'Sin datos';
+        document.getElementById('coachReviewSummary').innerHTML =
+          '<div><span>Fecha</span><strong>' + uxEscape(uxDate(record.updatedAt || record.createdAt)) + '</strong></div><div><span>Resultado</span><strong>' + uxEscape(record.sessionStatus || 'Sin estado') + '</strong></div><div><span>Duración</span><strong>' + uxEscape(record.duration == null ? '—' : record.duration + ' min') + '</strong></div><div><span>RPE / sRPE</span><strong>' + uxEscape((record.rpe == null ? '—' : record.rpe) + ' / ' + (record.srpeLoad == null ? '—' : Math.round(record.srpeLoad) + ' UA')) + '</strong></div><div class="wide"><span>Recuperación previa</span><strong>' + uxEscape(recovery) + '</strong></div><div><span>Planificado</span><strong>' + uxEscape((planned.plyoContacts || 0) + ' contactos · ' + (planned.decelEfforts || 0) + ' frenadas · ' + Math.round(planned.tonnage || 0) + ' kg·rep') + '</strong></div><div><span>Realizado</span><strong>' + uxEscape((record.plyoContacts || 0) + ' contactos · ' + (record.decelEfforts || 0) + ' frenadas · ' + Math.round(record.tonnage || 0) + ' kg·rep') + '</strong></div><div class="wide"><span>Comentario del deportista</span><strong>' + uxEscape(record.notes || 'Sin comentario') + '</strong></div>';
+        coachReviewDialog.showModal();
+      }
+      function closeCoachReview() { if (coachReviewDialog.open) coachReviewDialog.close(); }
+      document.getElementById('coachReviewForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const recordId = document.getElementById('coachReviewRecordId').value;
+        const records = uxRead(UX_KEYS.records, []);
+        const record = records.find(function (item) { return item.id === recordId; });
+        if (!record) return;
+        record.coachNote = document.getElementById('coachReviewNote').value.trim();
+        record.reviewStatus = 'reviewed'; record.reviewedAt = new Date().toISOString(); record.updatedAt = new Date().toISOString();
+        uxWrite(UX_KEYS.records, records); closeCoachReview(); document.dispatchEvent(new CustomEvent('padron:cloudhydrate'));
+        uxToast('Ejecución revisada y nota guardada.'); scheduleShellRender();
+      });
+      document.querySelectorAll('[data-review-close]').forEach(function (button) { button.addEventListener('click', closeCoachReview); });
+      coachReviewDialog.addEventListener('click', function (event) { if (event.target === coachReviewDialog) closeCoachReview(); });
+      function wrapAdvancedFieldsets() {
+        [{ selector: '#metricsForm fieldset', prefix: 'Mostrar ' }, { selector: '#athletePortalForm fieldset', prefix: 'Completar ' }].forEach(function (group) {
+          document.querySelectorAll(group.selector).forEach(function (fieldset) {
+            if (fieldset.parentElement && fieldset.parentElement.matches('details.advanced-metrics')) return;
+            const legend = fieldset.querySelector('legend');
+            const details = document.createElement('details'); details.className = 'advanced-metrics';
+            const summary = document.createElement('summary'); summary.textContent = group.prefix + (legend ? legend.textContent.toLocaleLowerCase('es') : 'métricas avanzadas');
+            fieldset.parentNode.insertBefore(details, fieldset); details.appendChild(summary); details.appendChild(fieldset);
+          });
+        });
+      }
+      function athleteDraftKey() {
+        return 'padronlab-athlete-draft-v1:' + (athleteSelectUx.value || 'athlete') + ':' + (document.getElementById('athletePlanSelect').value || 'plan');
+      }
+      function saveAthleteDraft() {
+        if (!document.getElementById('athletePlanSelect').value || athleteSubmissionLocked) return;
+        const values = {};
+        athletePortalFormUx.querySelectorAll('input[id], select[id], textarea[id]').forEach(function (field) { values[field.id] = field.value; });
+        localStorage.setItem(athleteDraftKey(), JSON.stringify({ values: values, updatedAt: new Date().toISOString() }));
+      }
+      function restoreAthleteDraft() {
+        if (!document.getElementById('athletePlanSelect').value) return;
+        const draft = uxRead(athleteDraftKey(), null);
+        if (!draft || !draft.values) return;
+        Object.keys(draft.values).forEach(function (id) { const field = document.getElementById(id); if (field && !field.disabled) field.value = draft.values[id]; });
+      }
+      function athleteReviewSummary() {
+        const planSelect = document.getElementById('athletePlanSelect');
+        const planLabel = planSelect.selectedIndex >= 0 ? planSelect.options[planSelect.selectedIndex].textContent : 'Sesión';
+        const recovery = [document.getElementById('athleteSleepHours').value ? document.getElementById('athleteSleepHours').value + ' h sueño' : '', document.getElementById('athleteFatigue').value ? 'fatiga ' + document.getElementById('athleteFatigue').value + '/5' : '', document.getElementById('athleteSoreness').value ? 'dolor ' + document.getElementById('athleteSoreness').value + '/5' : '', document.getElementById('athleteStress').value ? 'estrés ' + document.getElementById('athleteStress').value + '/5' : ''].filter(Boolean).join(' · ') || 'Sin datos adicionales';
+        return '<div class="wide"><span>Sesión</span><strong>' + uxEscape(planLabel) + '</strong></div><div><span>Resultado</span><strong>' + uxEscape(document.getElementById('athleteSessionStatus').selectedOptions[0].textContent) + '</strong></div><div><span>Duración</span><strong>' + uxEscape(document.getElementById('athleteDuration').value + ' min') + '</strong></div><div><span>RPE</span><strong>' + uxEscape(document.getElementById('athleteRpe').value + ' / 10') + '</strong></div><div><span>Carga sRPE</span><strong>' + uxEscape(Math.round(Number(document.getElementById('athleteDuration').value) * Number(document.getElementById('athleteRpe').value)) + ' UA') + '</strong></div><div class="wide"><span>Recuperación previa</span><strong>' + uxEscape(recovery) + '</strong></div><div class="wide"><span>Comentario</span><strong>' + uxEscape(document.getElementById('athleteNotes').value.trim() || 'Sin comentario') + '</strong></div>';
+      }
+      athletePortalFormUx.addEventListener('input', saveAthleteDraft);
+      athletePortalFormUx.addEventListener('change', saveAthleteDraft);
+      athletePortalFormUx.addEventListener('submit', function (event) {
+        if (athleteSubmissionConfirmed) {
+          athleteSubmissionConfirmed = false; athleteSubmissionLocked = true;
+          lastSubmittedPlanId = document.getElementById('athletePlanSelect').value;
+          localStorage.removeItem(athleteDraftKey()); athleteSubmitButton.disabled = true; athleteSubmitButton.setAttribute('aria-busy', 'true');
+          setTimeout(function () { athleteSubmitButton.removeAttribute('aria-busy'); athleteSubmitSuccess.hidden = false; athleteSubmissionLocked = false; scheduleShellRender(); }, 50);
+          return;
+        }
+        event.preventDefault(); event.stopImmediatePropagation();
+        if (!athletePortalFormUx.checkValidity()) { athletePortalFormUx.reportValidity(); return; }
+        if (!document.getElementById('athletePlanSelect').value) { uxToast('Selecciona una sesión antes de enviar.'); return; }
+        document.getElementById('athleteSubmitReviewSummary').innerHTML = athleteReviewSummary();
+        athleteReviewDialog.showModal();
+      }, true);
+      document.getElementById('confirmAthleteSubmission').addEventListener('click', function () {
+        if (athleteSubmissionLocked) return;
+        athleteSubmissionConfirmed = true;
+        if (athleteReviewDialog.open) athleteReviewDialog.close();
+        athletePortalFormUx.requestSubmit();
+      });
+      document.querySelectorAll('[data-athlete-review-close]').forEach(function (button) { button.addEventListener('click', function () { if (athleteReviewDialog.open) athleteReviewDialog.close(); }); });
+      athleteReviewDialog.addEventListener('click', function (event) { if (event.target === athleteReviewDialog) athleteReviewDialog.close(); });
+      document.getElementById('repeatAthleteExecution').addEventListener('click', function () {
+        athleteSubmitSuccess.hidden = true;
+        const select = document.getElementById('athletePlanSelect');
+        if (!lastSubmittedPlanId) return;
+        select.value = lastSubmittedPlanId; select.dispatchEvent(new Event('change', { bubbles: true }));
+        setTimeout(function () { athleteSubmitButton.disabled = false; athleteSubmitButton.removeAttribute('aria-busy'); athletePortalFormUx.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 30);
+      });
+      const portalObserver = new MutationObserver(function () { setTimeout(restoreAthleteDraft, 0); });
+      portalObserver.observe(document.getElementById('athleteExerciseList'), { childList: true, subtree: true });
+      const inbox = document.querySelector('.coach-inbox');
+      const trackingLayout = document.querySelector('.tracking-layout');
+      if (inbox && trackingLayout) trackingLayout.prepend(inbox);
+      wrapAdvancedFieldsets();
+      document.getElementById('toggleManualEntry').addEventListener('click', function (event) {
+        const isOpen = document.body.dataset.manualEntry === 'open';
+        document.body.dataset.manualEntry = isOpen ? 'closed' : 'open';
+        event.currentTarget.setAttribute('aria-expanded', String(!isOpen));
+        event.currentTarget.textContent = isOpen ? 'Registrar ejecución manual' : 'Cerrar registro manual';
+        document.querySelector('.metrics-entry').setAttribute('aria-hidden', String(isOpen));
+        if (!isOpen) setTimeout(function () { document.querySelector('.metrics-entry').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 20);
+      });
+      document.querySelector('.app-view-tabs').addEventListener('click', scheduleShellRender);
+      document.getElementById('cloudStatusBadge').addEventListener('click', function () { document.getElementById('cloudSettingsBtn').click(); });
+      directorySearch.addEventListener('input', scheduleShellRender);
+      document.addEventListener('click', function (event) {
+        const uxAction = event.target.closest('[data-ux-action]');
+        if (uxAction) { performUxAction(uxAction.dataset.uxAction); return; }
+        const dashboard = event.target.closest('[data-dashboard-action]');
+        if (dashboard) {
+          if (dashboard.dataset.dashboardAction === 'review-record') { setUxView('tracking'); setTimeout(function () { openCoachReview(dashboard.dataset.dashboardId); }, 60); }
+          else if (dashboard.dataset.dashboardAction === 'open-athlete') { selectUxAthlete(dashboard.dataset.dashboardId); setUxView('athletes'); }
+          else performUxAction(dashboard.dataset.dashboardAction);
+          return;
+        }
+        const review = event.target.closest('[data-ux-review-record]');
+        if (review) { openCoachReview(review.dataset.uxReviewRecord); return; }
+        const athleteAction = event.target.closest('[data-athlete-action]');
+        if (!athleteAction) return;
+        const athleteId = athleteAction.dataset.athleteId;
+        const action = athleteAction.dataset.athleteAction;
+        if (action === 'resend') { resendAthleteInvitation(athleteId, athleteAction); return; }
+        selectUxAthlete(athleteId);
+        if (action === 'edit') document.getElementById('editAthleteBtn').click();
+        else if (action === 'plan') setUxView('session');
+        else if (action === 'tracking') setUxView('tracking');
+        else if (action === 'preview') setUxView('athlete');
+      });
+      document.querySelectorAll('[data-planning-step]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const targets = { athlete: '#globalAthleteSelect', mesocycle: '#mesocycleSelect', microcycle: '#microcycleSelect', session: '#routineTabs', exercise: '.controls-wrap', assign: '.plan-assignment' };
+          const target = document.querySelector(targets[button.dataset.planningStep]);
+          if (!target) return;
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (typeof target.focus === 'function') setTimeout(function () { target.focus({ preventScroll: true }); }, 350);
+        });
+      });
+      document.addEventListener('padron:datachange', scheduleShellRender);
+      document.addEventListener('padron:cloudhydrate', scheduleShellRender);
+      document.addEventListener('padron:builderselection', scheduleShellRender);
+      document.addEventListener('padron:builderchange', scheduleShellRender);
+      athleteSelectUx.addEventListener('change', scheduleShellRender);
+      const roleObserver = new MutationObserver(function () {
+        if (document.body.dataset.cloudRole === 'athlete') { document.body.dataset.appView = 'athlete'; athleteSubmitSuccess.hidden = true; }
+      });
+      roleObserver.observe(document.body, { attributes: true, attributeFilter: ['data-cloud-role'] });
+      if (!new URL(window.location.href).searchParams.get('padronInvite') && document.body.dataset.cloudRole !== 'athlete') {
+        const storedContext = uxRead(UX_KEYS.context, {});
+        storedContext.view = 'home';
+        localStorage.setItem(UX_KEYS.context, JSON.stringify(storedContext));
+        setUxView('home');
+      }
+      renderUxShell();
+    })();
   </script>
 </body>
 </html>
