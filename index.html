@@ -2005,9 +2005,90 @@
       .athlete-submit-success { grid-template-columns: 38px 1fr; }
       .athlete-submit-success button { grid-column: 1 / -1; }
     }
+    /* Acceso por cuenta · v2026.07.23.3 */
+    .access-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: grid;
+      place-items: center;
+      overflow: auto;
+      padding: 24px;
+      color: var(--white);
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255,122,0,.2), transparent 32rem),
+        linear-gradient(135deg, #070707, #16120f);
+    }
+    body[data-auth-state="signed-in"] .access-gate { display: none; }
+    body:not([data-auth-state="signed-in"]) > :not(.access-gate) {
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .access-card {
+      width: min(520px, 100%);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 24px;
+      background: rgba(18,18,18,.94);
+      box-shadow: 0 30px 90px rgba(0,0,0,.48);
+    }
+    .access-card-head { padding: 30px 30px 22px; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .access-brand { display: flex; gap: 11px; align-items: center; font-weight: 950; letter-spacing: .06em; }
+    .access-brand .brand-mark { width: 40px; height: 40px; }
+    .access-card-head h1 { margin: 24px 0 6px; font-size: clamp(1.7rem, 6vw, 2.35rem); letter-spacing: -.045em; }
+    .access-card-head p { margin: 0; color: rgba(255,255,255,.62); font-size: .78rem; line-height: 1.55; }
+    .access-card-body { display: grid; gap: 16px; padding: 24px 30px 30px; }
+    .access-role-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 5px; border-radius: 12px; background: rgba(255,255,255,.07); }
+    .access-role-tabs button { min-height: 42px; border: 0; border-radius: 9px; color: rgba(255,255,255,.62); background: transparent; font: inherit; font-size: .7rem; font-weight: 900; cursor: pointer; }
+    .access-role-tabs button[aria-selected="true"] { color: #111; background: var(--orange); }
+    .access-fields { display: grid; gap: 11px; }
+    .access-fields label { display: grid; gap: 6px; color: rgba(255,255,255,.65); font-size: .64rem; font-weight: 900; text-transform: uppercase; }
+    .access-fields input { min-height: 49px; padding: 0 13px; border: 1px solid rgba(255,255,255,.15); border-radius: 10px; color: var(--white); background: rgba(255,255,255,.07); font: inherit; }
+    .access-primary { min-height: 50px; border: 0; border-radius: 11px; color: #111; background: var(--orange); font: inherit; font-weight: 950; cursor: pointer; }
+    .access-primary:disabled { cursor: wait; opacity: .65; }
+    .access-secondary { border: 0; color: rgba(255,255,255,.7); background: transparent; font: inherit; font-size: .68rem; font-weight: 850; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+    .access-state { margin: 0; padding: 11px 12px; border-left: 4px solid var(--orange); border-radius: 9px; color: rgba(255,255,255,.75); background: rgba(255,122,0,.1); font-size: .7rem; line-height: 1.45; }
+    .access-state[data-state="error"] { border-left-color: var(--danger); background: rgba(216,75,91,.13); }
+    .access-help { margin: 0; color: rgba(255,255,255,.48); font-size: .64rem; line-height: 1.5; text-align: center; }
+    .access-setup { display: grid; gap: 11px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.1); }
+    .access-setup[hidden] { display: none; }
+    @media (max-width: 560px) {
+      .access-gate { align-items: stretch; padding: 0; }
+      .access-card { min-height: 100%; border: 0; border-radius: 0; }
+      .access-card-head, .access-card-body { padding-inline: 20px; }
+    }
   </style>
 </head>
-<body data-app-view="home">
+<body data-app-view="home" data-auth-state="checking">
+  <section class="access-gate" id="accessGate" aria-labelledby="accessTitle">
+    <div class="access-card">
+      <div class="access-card-head">
+        <div class="access-brand"><span class="brand-mark">P</span> PADRON-LAB</div>
+        <h1 id="accessTitle">Accede a tu espacio</h1>
+        <p>La cuenta identifica si eres entrenador o deportista y carga automáticamente los perfiles, sesiones y registros que te corresponden.</p>
+      </div>
+      <form class="access-card-body" id="accessLoginForm">
+        <div class="access-role-tabs" role="tablist" aria-label="Tipo de acceso">
+          <button type="button" role="tab" aria-selected="true" data-access-role="trainer">Soy entrenador</button>
+          <button type="button" role="tab" aria-selected="false" data-access-role="athlete">Soy deportista</button>
+        </div>
+        <div class="access-fields">
+          <label>Correo<input id="accessEmail" type="email" autocomplete="email" required placeholder="tu@email.com"></label>
+          <label>Contraseña<input id="accessPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="Tu contraseña"></label>
+        </div>
+        <p class="access-state" id="accessState" role="status">Comprobando tu cuenta…</p>
+        <button class="access-primary" id="accessSubmit" type="submit">Entrar</button>
+        <button class="access-secondary" id="accessForgotPassword" type="button">He olvidado mi contraseña</button>
+        <p class="access-help" id="accessHelp">Si eres deportista y todavía no has creado tu contraseña, abre primero el correo de invitación enviado por tu entrenador.</p>
+        <button class="access-secondary" id="accessShowSetup" type="button" hidden>Configurar conexión del entrenador</button>
+        <div class="access-setup access-fields" id="accessSetup" hidden>
+          <label>URL del proyecto<input id="accessProjectUrl" type="url" placeholder="https://xxxx.supabase.co"></label>
+          <label>Clave pública<input id="accessAnonKey" type="password" autocomplete="off" placeholder="eyJ…"></label>
+          <button class="access-primary" id="accessSaveSetup" type="button">Guardar conexión</button>
+        </div>
+      </form>
+    </div>
+  </section>
   <header class="hero">
     <nav class="topbar" aria-label="Navegación principal">
       <div class="brand"><span class="brand-mark">P</span> PADRON-LAB</div>
@@ -2392,6 +2473,11 @@
         <div class="cloud-actions"><button class="context-action" id="cloudSignOut" type="button">Cerrar sesión</button><button class="context-action" id="cloudSignUp" type="button">Crear cuenta de entrenador</button><button class="context-action primary" id="cloudSignIn" type="button">Entrar y sincronizar</button></div>
       </section>
       <div class="cloud-state" id="cloudState">Modo local activo. Configura primero Supabase.</div>
+      <section class="cloud-section">
+        <h4>Enlace de acceso</h4><p>Copia este enlace común para que entrenador y deportistas puedan iniciar sesión desde cualquier dispositivo.</p>
+        <div class="cloud-actions"><button class="context-action primary" id="copyAccessLink" type="button">Copiar enlace de acceso</button></div>
+        <p class="profile-invite-state" id="copyAccessLinkState" role="status">El enlace solo incorpora la configuración pública necesaria para conectar la aplicación.</p>
+      </section>
       <details class="cloud-advanced">
         <summary>Conexión avanzada <small>solo es necesario configurarla una vez</small></summary>
         <section class="cloud-section">
@@ -2633,7 +2719,7 @@
   </dialog>
 
   <footer class="footer">
-    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.23.2 UX</span>
+    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.23.3 ACCESO</span>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -6651,6 +6737,12 @@
     const cloudBadge = document.getElementById('cloudStatusBadge');
     const passwordSetupDialog = document.getElementById('passwordSetupDialog');
     const passwordSetupState = document.getElementById('passwordSetupState');
+    const accessGate = document.getElementById('accessGate');
+    const accessState = document.getElementById('accessState');
+    const accessSubmit = document.getElementById('accessSubmit');
+    const accessShowSetup = document.getElementById('accessShowSetup');
+    const accessSetup = document.getElementById('accessSetup');
+    let requestedAccessRole = 'trainer';
     let supabaseClient = null;
     let supabaseModule = null;
     let supabaseLoadPromise = null;
@@ -6664,12 +6756,20 @@
     (function rememberAthleteInvite() {
       const url = new URL(window.location.href);
       const claimCode = url.searchParams.get('claim');
-      if (url.searchParams.get('padronInvite') === 'athlete' && claimCode) {
+      if ((url.searchParams.get('padronInvite') === 'athlete' && claimCode) || url.searchParams.get('padronReset') === '1' || url.searchParams.get('padronAccess') === '1') {
         const projectUrl = (url.searchParams.get('cloudUrl') || '').replace(/\/$/, '');
         const publicKey = url.searchParams.get('cloudKey') || '';
         if (/^https:\/\/.+\.supabase\.co$/.test(projectUrl) && publicKey.length >= 40) {
           localStorage.setItem(CLOUD_SETTINGS_KEY, JSON.stringify({ url: projectUrl, anonKey: publicKey }));
         }
+        if (url.searchParams.get('padronAccess') === '1') {
+          url.searchParams.delete('padronAccess');
+          url.searchParams.delete('cloudUrl');
+          url.searchParams.delete('cloudKey');
+          window.history.replaceState({}, document.title, url.pathname + url.search + url.hash);
+        }
+      }
+      if (url.searchParams.get('padronInvite') === 'athlete' && claimCode) {
         localStorage.setItem(INVITE_SETUP_KEY, JSON.stringify({ claimCode: claimCode, createdAt: new Date().toISOString() }));
       }
     })();
@@ -6682,6 +6782,18 @@
       cloudState.textContent = message;
       cloudState.style.borderLeftColor = isError ? '#e63b2e' : '#ff7a00';
       if (isError) setCloudBadge('Error de sincronización', 'error');
+    }
+
+    function setAccessState(state, message, isError) {
+      document.body.dataset.authState = state;
+      if (message) accessState.textContent = message;
+      accessState.dataset.state = isError ? 'error' : '';
+      accessSubmit.disabled = state === 'checking';
+      accessSubmit.setAttribute('aria-busy', state === 'checking' ? 'true' : 'false');
+      const settings = cloudSettings();
+      accessShowSetup.hidden = Boolean(settings.url && settings.anonKey);
+      document.getElementById('accessProjectUrl').value = settings.url || '';
+      document.getElementById('accessAnonKey').value = settings.anonKey || '';
     }
 
     function setCloudBadge(label, state) {
@@ -6750,6 +6862,8 @@
       cleanUrl.searchParams.delete('claim');
       cleanUrl.searchParams.delete('cloudUrl');
       cleanUrl.searchParams.delete('cloudKey');
+      cleanUrl.searchParams.delete('padronReset');
+      cleanUrl.searchParams.delete('padronAccess');
       const authHash = new URLSearchParams(cleanUrl.hash.replace(/^#/, ''));
       ['access_token', 'refresh_token', 'expires_at', 'expires_in', 'provider_token', 'token_type', 'type'].forEach(function (key) {
         authHash.delete(key);
@@ -6834,18 +6948,22 @@
 
     async function claimPendingAthleteInvite() {
       const pending = pendingAthleteInvite();
-      if (!pending || !pending.claimCode || !cloudSession || !cloudProfile || cloudProfile.role !== 'athlete') return false;
+      const metadata = cloudSession && cloudSession.user ? cloudSession.user.user_metadata || {} : {};
+      const claimCode = pending && pending.claimCode ? pending.claimCode : metadata.claim_code;
+      if (!claimCode || !cloudSession || !cloudProfile || cloudProfile.role !== 'athlete') return false;
       const current = await supabaseClient.from('athletes').select('id').eq('user_id', cloudSession.user.id).maybeSingle();
       if (current.error) throw current.error;
       if (current.data) return true;
-      const claim = await supabaseClient.rpc('claim_athlete_profile', { p_code: pending.claimCode });
+      const claim = await supabaseClient.rpc('claim_athlete_profile', { p_code: claimCode });
       if (claim.error) throw claim.error;
       return true;
     }
 
     function showPasswordSetupIfNeeded() {
-      if (!pendingAthleteInvite() || !cloudSession || !cloudProfile || cloudProfile.role !== 'athlete') return;
-      if (athletePasswordSetupCompleted()) {
+      const isPasswordReset = new URL(window.location.href).searchParams.get('padronReset') === '1';
+      const isAthleteInvite = Boolean(pendingAthleteInvite() && cloudSession && cloudProfile && cloudProfile.role === 'athlete');
+      if (!isPasswordReset && !isAthleteInvite) return;
+      if (!isPasswordReset && athletePasswordSetupCompleted()) {
         clearAthleteInviteSetup();
         return;
       }
@@ -6883,12 +7001,16 @@
     }
 
     async function hydrateAthlete() {
-      const athleteResult = await supabaseClient.from('athletes').select('id, coach_id, user_id, payload').eq('user_id', cloudSession.user.id).maybeSingle();
+      let athleteResult = await supabaseClient.from('athletes').select('id, coach_id, user_id, payload').eq('user_id', cloudSession.user.id).maybeSingle();
       if (athleteResult.error) throw athleteResult.error;
       if (!athleteResult.data) {
+        await claimPendingAthleteInvite();
+        athleteResult = await supabaseClient.from('athletes').select('id, coach_id, user_id, payload').eq('user_id', cloudSession.user.id).maybeSingle();
+        if (athleteResult.error) throw athleteResult.error;
+      }
+      if (!athleteResult.data) {
         linkedAthlete = null;
-        cloudMessage('La cuenta está activa, pero no se ha encontrado el perfil asignado a este correo. Abre de nuevo el enlace recibido o contacta con tu entrenador.', true);
-        return false;
+        throw new Error('Tu cuenta está activa, pero todavía no está vinculada a un perfil. Abre una vez el correo de invitación enviado por tu entrenador y vuelve a entrar.');
       }
       linkedAthlete = athleteResult.data;
       const [plansResult, recordsResult, workspaceResult] = await Promise.all([
@@ -6918,6 +7040,7 @@
         setCloudBadge('Sincronizado', 'synced');
         cloudMessage('Sincronización activa como ' + (cloudProfile.role === 'athlete' ? 'deportista.' : 'entrenador.'));
         if (changed) document.dispatchEvent(new CustomEvent('padron:cloudhydrate'));
+        setAccessState('signed-in', '');
       } finally { cloudHydrating = false; }
     }
 
@@ -7001,10 +7124,12 @@
       document.getElementById('cloudAnonKey').value = settings.anonKey || '';
       if (!settings.url || !settings.anonKey) {
         setCloudBadge('Modo local', 'local');
+        setAccessState('signed-out', 'El entrenador debe configurar la conexión una sola vez en este dispositivo.', true);
         return;
       }
       try {
         setCloudBadge('Conectando…', 'saving');
+        setAccessState('checking', 'Comprobando tu cuenta…');
         await loadSupabase();
         const sessionResult = await supabaseClient.auth.getSession();
         if (sessionResult.error) throw sessionResult.error;
@@ -7012,6 +7137,7 @@
         if (!cloudSession) {
           setCloudBadge('Sin conexión', 'offline');
           cloudMessage('Proyecto conectado. Entra o crea una cuenta para sincronizar.');
+          setAccessState('signed-out', 'Introduce el correo y la contraseña de tu cuenta.');
           return;
         }
         await fetchCloudProfile();
@@ -7023,9 +7149,121 @@
       } catch (error) {
         setCloudBadge('Error de sincronización', 'error');
         cloudMessage(error.message, true);
-        if (!options || !options.silent) cloudDialog.showModal();
+        setAccessState('signed-out', error.message, true);
       }
     }
+
+    document.querySelectorAll('[data-access-role]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        requestedAccessRole = button.dataset.accessRole;
+        document.querySelectorAll('[data-access-role]').forEach(function (item) {
+          item.setAttribute('aria-selected', item === button ? 'true' : 'false');
+        });
+        document.getElementById('accessHelp').textContent = requestedAccessRole === 'athlete'
+          ? 'Si todavía no has creado tu contraseña, abre primero el correo de invitación enviado por tu entrenador.'
+          : 'Utiliza la cuenta de entrenador con la que registraste y planificaste a tus deportistas.';
+        const hasSettings = Boolean(cloudSettings().url && cloudSettings().anonKey);
+        accessShowSetup.hidden = requestedAccessRole === 'athlete' || hasSettings;
+        if (requestedAccessRole === 'athlete' && !hasSettings) {
+          setAccessState('signed-out', 'Abre el enlace de acceso compartido por tu entrenador para conectar tu cuenta.', true);
+          accessShowSetup.hidden = true;
+        }
+      });
+    });
+
+    document.getElementById('accessLoginForm').addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const email = document.getElementById('accessEmail').value.trim();
+      const password = document.getElementById('accessPassword').value;
+      if (!email || password.length < 8) {
+        setAccessState('signed-out', 'Introduce un correo válido y una contraseña de al menos 8 caracteres.', true);
+        return;
+      }
+      try {
+        setAccessState('checking', 'Comprobando tus datos y cargando tu espacio…');
+        await loadSupabase();
+        const result = await supabaseClient.auth.signInWithPassword({ email: email, password: password });
+        if (result.error) throw result.error;
+        cloudSession = result.data.session;
+        await fetchCloudProfile();
+        if (!cloudProfile) throw new Error('No se encontró el perfil de acceso de esta cuenta.');
+        if (cloudProfile.role !== requestedAccessRole) {
+          await supabaseClient.auth.signOut();
+          cloudSession = null;
+          cloudProfile = null;
+          throw new Error(requestedAccessRole === 'athlete'
+            ? 'Esta cuenta pertenece al entrenador. Selecciona “Soy entrenador”.'
+            : 'Esta cuenta pertenece a un deportista. Selecciona “Soy deportista”.');
+        }
+        if (cloudProfile.role === 'athlete') await claimPendingAthleteInvite();
+        subscribeRealtime();
+        await hydrateCloud();
+        showPasswordSetupIfNeeded();
+      } catch (error) {
+        setAccessState('signed-out', error && error.message ? error.message : 'No se pudo iniciar sesión.', true);
+      }
+    });
+
+    document.getElementById('accessForgotPassword').addEventListener('click', async function () {
+      const email = document.getElementById('accessEmail').value.trim();
+      if (!email) {
+        setAccessState('signed-out', 'Escribe primero el correo de tu cuenta.', true);
+        return;
+      }
+      try {
+        setAccessState('checking', 'Enviando el correo para recuperar tu contraseña…');
+        await loadSupabase();
+        const settings = cloudSettings();
+        const redirect = new URL(window.location.origin + window.location.pathname);
+        redirect.searchParams.set('padronReset', '1');
+        redirect.searchParams.set('cloudUrl', settings.url);
+        redirect.searchParams.set('cloudKey', settings.anonKey);
+        const result = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: redirect.toString() });
+        if (result.error) throw result.error;
+        setAccessState('signed-out', 'Correo enviado. Abre el enlace recibido para elegir una nueva contraseña.');
+      } catch (error) {
+        setAccessState('signed-out', error && error.message ? error.message : 'No se pudo enviar el correo.', true);
+      }
+    });
+
+    accessShowSetup.addEventListener('click', function () {
+      accessSetup.hidden = !accessSetup.hidden;
+    });
+    document.getElementById('accessSaveSetup').addEventListener('click', async function () {
+      const url = document.getElementById('accessProjectUrl').value.trim().replace(/\/$/, '');
+      const anonKey = document.getElementById('accessAnonKey').value.trim();
+      if (!/^https:\/\/.+\.supabase\.co$/.test(url) || anonKey.length < 40) {
+        setAccessState('signed-out', 'Comprueba la URL del proyecto y la clave pública.', true);
+        return;
+      }
+      localStorage.setItem(CLOUD_SETTINGS_KEY, JSON.stringify({ url: url, anonKey: anonKey }));
+      supabaseClient = null;
+      supabaseLoadPromise = null;
+      accessSetup.hidden = true;
+      await connectCloud({ silent: true });
+    });
+
+    document.getElementById('copyAccessLink').addEventListener('click', async function () {
+      const state = document.getElementById('copyAccessLinkState');
+      const settings = cloudSettings();
+      if (!settings.url || !settings.anonKey) {
+        state.dataset.state = 'error';
+        state.textContent = 'Guarda primero la conexión del proyecto.';
+        return;
+      }
+      const accessUrl = new URL(window.location.origin + window.location.pathname);
+      accessUrl.searchParams.set('padronAccess', '1');
+      accessUrl.searchParams.set('cloudUrl', settings.url);
+      accessUrl.searchParams.set('cloudKey', settings.anonKey);
+      try {
+        await navigator.clipboard.writeText(accessUrl.toString());
+        state.dataset.state = 'success';
+        state.textContent = 'Enlace copiado. Puedes enviarlo a todos tus deportistas.';
+      } catch (error) {
+        state.dataset.state = 'error';
+        state.textContent = 'No se pudo copiar automáticamente. Abre la app desde un navegador con permiso para usar el portapapeles.';
+      }
+    });
 
     document.getElementById('cloudSettingsBtn').addEventListener('click', function () {
       const settings = cloudSettings();
@@ -7141,6 +7379,7 @@
       delete document.body.dataset.cloudRole;
       setCloudBadge(cloudSettings().url ? 'Sin conexión' : 'Modo local', cloudSettings().url ? 'offline' : 'local');
       cloudMessage('Sesión cerrada. Los datos locales permanecen en este dispositivo.');
+      setAccessState('signed-out', 'Sesión cerrada. Introduce tus datos para volver a entrar.');
     });
     document.addEventListener('padron:datachange', scheduleCloudSync);
     document.addEventListener('padron:builderchange', scheduleCloudSync);
