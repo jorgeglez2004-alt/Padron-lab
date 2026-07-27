@@ -2005,7 +2005,7 @@
       .athlete-submit-success { grid-template-columns: 38px 1fr; }
       .athlete-submit-success button { grid-column: 1 / -1; }
     }
-    /* Acceso por cuenta · v2026.07.23.3 */
+    /* Acceso directo · v2026.07.23.4 */
     .access-gate {
       position: fixed;
       inset: 0;
@@ -2019,11 +2019,12 @@
         radial-gradient(circle at 18% 18%, rgba(255,122,0,.2), transparent 32rem),
         linear-gradient(135deg, #070707, #16120f);
     }
-    body[data-auth-state="signed-in"] .access-gate { display: none; }
-    body:not([data-auth-state="signed-in"]) > :not(.access-gate) {
-      visibility: hidden;
-      pointer-events: none;
+    .access-gate { display: none !important; }
+    body > :not(.access-gate) {
+      visibility: visible;
+      pointer-events: auto;
     }
+    #passwordSetupDialog { display: none !important; }
     .access-card {
       width: min(520px, 100%);
       overflow: hidden;
@@ -2059,8 +2060,8 @@
     }
   </style>
 </head>
-<body data-app-view="home" data-auth-state="checking">
-  <section class="access-gate" id="accessGate" aria-labelledby="accessTitle">
+<body data-app-view="home" data-auth-state="signed-in">
+  <section class="access-gate" id="accessGate" aria-labelledby="accessTitle" hidden aria-hidden="true">
     <div class="access-card">
       <div class="access-card-head">
         <div class="access-brand"><span class="brand-mark">P</span> PADRON-LAB</div>
@@ -2453,8 +2454,8 @@
           <label class="profile-wide"><span>Objetivos y aspectos que quiere mejorar</span><textarea id="athleteGoals" maxlength="600" placeholder="Objetivos principales, prioridades de rendimiento y necesidades percibidas…"></textarea></label>
         </div>
       </details>
-      <p class="profile-privacy">Al registrar un perfil nuevo se sincronizarán sus datos y se enviará automáticamente el correo para que el deportista confirme el acceso y elija su contraseña.</p>
-      <p class="profile-invite-state" id="athleteInviteState" role="status">El acceso se enviará desde este formulario; el deportista no tendrá que entrar en Configuración.</p>
+      <p class="profile-privacy">Al registrar un perfil nuevo se sincronizarán sus datos y se enviará automáticamente un enlace personal de acceso directo.</p>
+      <p class="profile-invite-state" id="athleteInviteState" role="status">El deportista abrirá el correo y entrará directamente en sus sesiones, sin crear contraseña.</p>
       <div class="profile-actions">
         <button class="profile-delete" id="deleteAthleteBtn" type="button" hidden>Eliminar perfil</button>
         <span></span>
@@ -2498,7 +2499,7 @@
     </div>
   </dialog>
 
-  <dialog class="profile-dialog" id="passwordSetupDialog" aria-labelledby="passwordSetupTitle">
+  <dialog class="profile-dialog" id="passwordSetupDialog" aria-labelledby="passwordSetupTitle" hidden aria-hidden="true">
     <form id="passwordSetupForm">
       <div class="profile-dialog-head">
         <div>
@@ -2719,7 +2720,7 @@
   </dialog>
 
   <footer class="footer">
-    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.23.3 ACCESO</span>
+    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.23.4 ACCESO DIRECTO</span>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -4902,7 +4903,7 @@
         }
       }
 
-      function saveCurrentPlan() {
+      async function saveCurrentPlan() {
         const athlete = activeAthlete();
         if (!athlete) {
           notify('Selecciona un deportista antes de guardar la planificación.');
@@ -4942,7 +4943,16 @@
         syncExternalFromRoutine();
         renderAnalytics();
         if (activeContext.view === 'athlete') renderAthletePortal();
-        notify(existing ? 'Plan actualizado para ' + athlete.name + '.' : 'Plan asignado a ' + athlete.name + '.');
+        document.getElementById('planSaveStatus').textContent = 'Guardando y enviando la sesión a ' + athlete.name + '…';
+        try {
+          if (!window.padronCloud || typeof window.padronCloud.syncNow !== 'function') throw new Error('La sincronización todavía no está preparada.');
+          await window.padronCloud.syncNow();
+          document.getElementById('planSaveStatus').textContent = 'Sesión asignada y sincronizada para ' + athlete.name + '.';
+          notify(existing ? 'Plan actualizado y enviado a ' + athlete.name + '.' : 'Plan asignado y enviado a ' + athlete.name + '.');
+        } catch (error) {
+          document.getElementById('planSaveStatus').textContent = 'Plan guardado en este dispositivo, pero pendiente de sincronizar. Abre Configuración y comprueba la conexión.';
+          notify('El plan se guardó, pero todavía no pudo enviarse al deportista.');
+        }
       }
 
       function refreshAssignedPlanFromBuilder(detail) {
@@ -6785,7 +6795,7 @@
     }
 
     function setAccessState(state, message, isError) {
-      document.body.dataset.authState = state;
+      document.body.dataset.authState = 'signed-in';
       if (message) accessState.textContent = message;
       accessState.dataset.state = isError ? 'error' : '';
       accessSubmit.disabled = state === 'checking';
@@ -6882,11 +6892,6 @@
       return url.toString();
     }
 
-    function temporaryPassword() {
-      const bytes = window.crypto.getRandomValues(new Uint8Array(24));
-      return Array.from(bytes, function (value) { return (value % 36).toString(36); }).join('') + 'Aa1!';
-    }
-
     async function ensureTrainerAccess() {
       await loadSupabase();
       const sessionResult = await supabaseClient.auth.getSession();
@@ -6917,33 +6922,22 @@
         auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
       });
       const redirectTo = athleteInviteRedirect(athlete.code);
-      let needsPasswordEmail = false;
       try {
-        const signUp = await inviteClient.auth.signUp({
+        const magicLink = await inviteClient.auth.signInWithOtp({
           email: athlete.email,
-          password: temporaryPassword(),
           options: {
             emailRedirectTo: redirectTo,
+            shouldCreateUser: true,
             data: { role: 'athlete', display_name: athlete.name, athlete_id: athlete.id, claim_code: athlete.code }
           }
         });
-        if (signUp.error) {
-          if (/already|registered|exists/i.test(signUp.error.message || '')) needsPasswordEmail = true;
-          else throw signUp.error;
-        } else {
-          const identities = signUp.data && signUp.data.user && signUp.data.user.identities;
-          needsPasswordEmail = Boolean(signUp.data && signUp.data.session) || (Array.isArray(identities) && identities.length === 0);
-        }
-        if (needsPasswordEmail) {
-          const recovery = await inviteClient.auth.resetPasswordForEmail(athlete.email, { redirectTo: redirectTo });
-          if (recovery.error) throw recovery.error;
-        }
+        if (magicLink.error) throw magicLink.error;
       } catch (error) {
         const wrapped = new Error('El perfil se ha sincronizado, pero no se pudo enviar el correo: ' + (error && error.message ? error.message : 'error desconocido') + '. Pulsa de nuevo Guardar y reenviar acceso.');
         wrapped.profileSynced = true;
         throw wrapped;
       }
-      return { email: athlete.email, mode: needsPasswordEmail ? 'password' : 'confirmation' };
+      return { email: athlete.email, mode: 'magic-link' };
     }
 
     async function claimPendingAthleteInvite() {
@@ -6960,21 +6954,38 @@
     }
 
     function showPasswordSetupIfNeeded() {
-      const isPasswordReset = new URL(window.location.href).searchParams.get('padronReset') === '1';
-      const isAthleteInvite = Boolean(pendingAthleteInvite() && cloudSession && cloudProfile && cloudProfile.role === 'athlete');
-      if (!isPasswordReset && !isAthleteInvite) return;
-      if (!isPasswordReset && athletePasswordSetupCompleted()) {
-        clearAthleteInviteSetup();
-        return;
-      }
-      if (cloudDialog.open) cloudDialog.close();
-      const athletePanel = document.getElementById('athleteDialog');
-      if (athletePanel && athletePanel.open && typeof athletePanel.close === 'function') athletePanel.close();
-      if (!passwordSetupDialog.open) passwordSetupDialog.showModal();
+      if (cloudSession && cloudProfile && cloudProfile.role === 'athlete') clearAthleteInviteSetup();
     }
 
     function rowPayload(row) {
-      return Object.assign({}, row.payload || {}, { id: row.id, userId: row.user_id || undefined });
+      return Object.assign({}, row.payload || {}, {
+        id: row.id,
+        userId: row.user_id || (row.payload && row.payload.userId) || undefined,
+        updatedAt: (row.payload && row.payload.updatedAt) || row.updated_at || undefined
+      });
+    }
+
+    function mergeByFreshest(localItems, remoteItems) {
+      const merged = new Map();
+      (Array.isArray(remoteItems) ? remoteItems : []).forEach(function (item) {
+        if (item && item.id) merged.set(item.id, item);
+      });
+      (Array.isArray(localItems) ? localItems : []).forEach(function (localItem) {
+        if (!localItem || !localItem.id) return;
+        const remoteItem = merged.get(localItem.id);
+        if (!remoteItem) {
+          merged.set(localItem.id, localItem);
+          return;
+        }
+        const localTime = Date.parse(localItem.updatedAt || localItem.createdAt || 0) || 0;
+        const remoteTime = Date.parse(remoteItem.updatedAt || remoteItem.createdAt || 0) || 0;
+        const freshest = localTime > remoteTime ? localItem : remoteItem;
+        const older = freshest === localItem ? remoteItem : localItem;
+        merged.set(localItem.id, Object.assign({}, older, freshest, {
+          userId: remoteItem.userId || localItem.userId || undefined
+        }));
+      });
+      return Array.from(merged.values());
     }
 
     async function hydrateTrainer() {
@@ -6992,11 +7003,21 @@
         await syncTrainerData();
         return false;
       }
+      const remoteAthletes = athletesResult.data.map(rowPayload);
+      const remotePlans = plansResult.data.map(function (row) { return Object.assign({}, row.payload, { updatedAt: (row.payload && row.payload.updatedAt) || row.updated_at }); });
+      const remoteRecords = recordsResult.data.map(function (row) { return Object.assign({}, row.payload, { updatedAt: (row.payload && row.payload.updatedAt) || row.updated_at }); });
+      const mergedAthletes = mergeByFreshest(localArray(DATA_KEYS.athletes), remoteAthletes);
+      const mergedPlans = mergeByFreshest(localArray(DATA_KEYS.plans), remotePlans);
+      const mergedRecords = mergeByFreshest(localArray(DATA_KEYS.records), remoteRecords);
+      const needsPush = JSON.stringify(mergedAthletes) !== JSON.stringify(remoteAthletes) ||
+        JSON.stringify(mergedPlans) !== JSON.stringify(remotePlans) ||
+        JSON.stringify(mergedRecords) !== JSON.stringify(remoteRecords);
       let changed = false;
-      changed = writeHydratedLocal(DATA_KEYS.athletes, athletesResult.data.map(rowPayload)) || changed;
-      changed = writeHydratedLocal(DATA_KEYS.plans, plansResult.data.map(function (row) { return row.payload; })) || changed;
-      changed = writeHydratedLocal(DATA_KEYS.records, recordsResult.data.map(function (row) { return row.payload; })) || changed;
+      changed = writeHydratedLocal(DATA_KEYS.athletes, mergedAthletes) || changed;
+      changed = writeHydratedLocal(DATA_KEYS.plans, mergedPlans) || changed;
+      changed = writeHydratedLocal(DATA_KEYS.records, mergedRecords) || changed;
       if (workspaceResult.data && workspaceResult.data.payload) changed = writeHydratedLocal(DATA_KEYS.builder, workspaceResult.data.payload) || changed;
+      if (needsPush) await syncTrainerData();
       return changed;
     }
 
@@ -7118,13 +7139,25 @@
       }, 450);
     }
 
+    async function syncCloudNow() {
+      clearTimeout(cloudSyncTimer);
+      if (!cloudSession || !cloudProfile || cloudProfile.role !== 'trainer') {
+        throw new Error('La cuenta del entrenador no está conectada.');
+      }
+      setCloudBadge('Guardando…', 'saving');
+      await syncTrainerData();
+      setCloudBadge('Sincronizado', 'synced');
+      cloudMessage('Sesión enviada y sincronizada correctamente.');
+      return true;
+    }
+
     async function connectCloud(options) {
       const settings = cloudSettings();
       document.getElementById('cloudProjectUrl').value = settings.url || '';
       document.getElementById('cloudAnonKey').value = settings.anonKey || '';
       if (!settings.url || !settings.anonKey) {
         setCloudBadge('Modo local', 'local');
-        setAccessState('signed-out', 'El entrenador debe configurar la conexión una sola vez en este dispositivo.', true);
+        setAccessState('signed-in', 'Modo local activo. Configura la conexión desde el indicador de sincronización.');
         return;
       }
       try {
@@ -7136,8 +7169,8 @@
         cloudSession = sessionResult.data.session;
         if (!cloudSession) {
           setCloudBadge('Sin conexión', 'offline');
-          cloudMessage('Proyecto conectado. Entra o crea una cuenta para sincronizar.');
-          setAccessState('signed-out', 'Introduce el correo y la contraseña de tu cuenta.');
+          cloudMessage('Proyecto conectado, pero la sincronización necesita reconectarse desde Configuración.');
+          setAccessState('signed-in', 'Aplicación abierta en modo local.');
           return;
         }
         await fetchCloudProfile();
@@ -7149,7 +7182,7 @@
       } catch (error) {
         setCloudBadge('Error de sincronización', 'error');
         cloudMessage(error.message, true);
-        setAccessState('signed-out', error.message, true);
+        setAccessState('signed-in', error.message, true);
       }
     }
 
@@ -7383,7 +7416,7 @@
     });
     document.addEventListener('padron:datachange', scheduleCloudSync);
     document.addEventListener('padron:builderchange', scheduleCloudSync);
-    window.padronCloud = { registerAthleteAccess: registerAthleteAccess };
+    window.padronCloud = { registerAthleteAccess: registerAthleteAccess, syncNow: syncCloudNow };
     connectCloud({ silent: true });
   </script>
   <script>
@@ -7513,7 +7546,7 @@
           const athleteRecords = records.filter(function (record) { return record.athleteId === athlete.id; }).sort(function (a, b) { return String(b.updatedAt || b.createdAt || '').localeCompare(String(a.updatedAt || a.createdAt || '')); });
           const athletePlans = plans.filter(function (plan) { return plan.athleteId === athlete.id; });
           const nextPlan = athletePlans.find(function (plan) { return !records.some(function (record) { return recordMatchesPlan(record, plan); }); });
-          const resend = status.key !== 'active' && athlete.email ? '<button type="button" data-athlete-action="resend" data-athlete-id="' + athlete.id + '">Reenviar invitación</button>' : '';
+          const resend = athlete.email ? '<button type="button" data-athlete-action="resend" data-athlete-id="' + athlete.id + '">Enviar enlace de acceso</button>' : '';
           return '<article class="athlete-directory-card"><div class="athlete-directory-head"><span class="athlete-avatar">' + uxEscape(athleteInitials(athlete.name)) + '</span><div><strong>' + uxEscape(athlete.name) + '</strong><small>' + uxEscape([athlete.sport, athlete.team, athlete.position].filter(Boolean).join(' · ') || athlete.email || 'Sin datos deportivos') + '</small></div><span class="access-status" data-state="' + status.key + '">' + status.label + '</span></div><div class="athlete-directory-meta"><span><small>Última ejecución</small><strong>' + uxEscape(athleteRecords.length ? (athleteRecords[0].sessionName || athleteRecords[0].routineName || 'Sesión') + ' · ' + uxDate(athleteRecords[0].updatedAt || athleteRecords[0].createdAt) : 'Sin ejecuciones') + '</strong></span><span><small>Próxima sesión</small><strong>' + uxEscape(nextPlan ? (nextPlan.sessionName || nextPlan.routineName || 'Sesión asignada') : 'Sin sesión pendiente') + '</strong></span></div><div class="athlete-directory-actions"><button type="button" data-athlete-action="edit" data-athlete-id="' + athlete.id + '">Editar</button><button type="button" data-athlete-action="plan" data-athlete-id="' + athlete.id + '">Planificar</button><button type="button" data-athlete-action="tracking" data-athlete-id="' + athlete.id + '">Seguimiento</button><button type="button" data-athlete-action="preview" data-athlete-id="' + athlete.id + '">Vista del deportista</button>' + resend + '</div></article>';
         }).join('');
       }
@@ -7578,7 +7611,7 @@
           await window.padronCloud.registerAthleteAccess(athlete);
           athlete.inviteSentAt = new Date().toISOString(); delete athlete.inviteError; athlete.updatedAt = new Date().toISOString();
           uxWrite(UX_KEYS.athletes, athletes); document.dispatchEvent(new CustomEvent('padron:cloudhydrate'));
-          uxToast('Invitación reenviada a ' + athlete.email + '.');
+          uxToast('Enlace de acceso directo enviado a ' + athlete.email + '.');
         } catch (error) {
           athlete.inviteError = error && error.message ? error.message : 'No se pudo enviar'; uxWrite(UX_KEYS.athletes, athletes);
           uxToast('No se pudo reenviar la invitación.');
