@@ -2005,7 +2005,7 @@
       .athlete-submit-success { grid-template-columns: 38px 1fr; }
       .athlete-submit-success button { grid-column: 1 / -1; }
     }
-    /* Acceso directo · v2026.07.23.4 */
+    /* Acceso unificado · v2026.07.27.3 */
     .access-gate {
       position: fixed;
       inset: 0;
@@ -2019,12 +2019,17 @@
         radial-gradient(circle at 18% 18%, rgba(255,122,0,.2), transparent 32rem),
         linear-gradient(135deg, #070707, #16120f);
     }
-    .access-gate { display: none !important; }
-    body > :not(.access-gate) {
+    .access-gate[hidden] { display: none !important; }
+    body[data-auth-state="checking"] > :not(.access-gate),
+    body[data-auth-state="signed-out"] > :not(.access-gate) {
+      visibility: hidden;
+      pointer-events: none;
+    }
+    body[data-auth-state="checking"] .access-gate,
+    body[data-auth-state="signed-out"] .access-gate {
       visibility: visible;
       pointer-events: auto;
     }
-    #passwordSetupDialog { display: none !important; }
     .access-card {
       width: min(520px, 100%);
       overflow: hidden;
@@ -2060,8 +2065,8 @@
     }
   </style>
 </head>
-<body data-app-view="home" data-auth-state="signed-in">
-  <section class="access-gate" id="accessGate" aria-labelledby="accessTitle" hidden aria-hidden="true">
+<body data-app-view="home" data-auth-state="checking">
+  <section class="access-gate" id="accessGate" aria-labelledby="accessTitle" aria-hidden="false">
     <div class="access-card">
       <div class="access-card-head">
         <div class="access-brand"><span class="brand-mark">P</span> PADRON-LAB</div>
@@ -2069,10 +2074,6 @@
         <p>La cuenta identifica si eres entrenador o deportista y carga automáticamente los perfiles, sesiones y registros que te corresponden.</p>
       </div>
       <form class="access-card-body" id="accessLoginForm">
-        <div class="access-role-tabs" role="tablist" aria-label="Tipo de acceso">
-          <button type="button" role="tab" aria-selected="true" data-access-role="trainer">Soy entrenador</button>
-          <button type="button" role="tab" aria-selected="false" data-access-role="athlete">Soy deportista</button>
-        </div>
         <div class="access-fields">
           <label>Correo<input id="accessEmail" type="email" autocomplete="email" required placeholder="tu@email.com"></label>
           <label>Contraseña<input id="accessPassword" type="password" minlength="8" autocomplete="current-password" required placeholder="Tu contraseña"></label>
@@ -2080,7 +2081,7 @@
         <p class="access-state" id="accessState" role="status">Comprobando tu cuenta…</p>
         <button class="access-primary" id="accessSubmit" type="submit">Entrar</button>
         <button class="access-secondary" id="accessForgotPassword" type="button">He olvidado mi contraseña</button>
-        <p class="access-help" id="accessHelp">Si eres deportista y todavía no has creado tu contraseña, abre primero el correo de invitación enviado por tu entrenador.</p>
+        <p class="access-help" id="accessHelp">Usa siempre este mismo acceso. PADRON-LAB detectará automáticamente si eres entrenador o deportista.</p>
         <button class="access-secondary" id="accessShowSetup" type="button" hidden>Configurar conexión del entrenador</button>
         <div class="access-setup access-fields" id="accessSetup" hidden>
           <label>URL del proyecto<input id="accessProjectUrl" type="url" placeholder="https://xxxx.supabase.co"></label>
@@ -2720,7 +2721,7 @@
   </dialog>
 
   <footer class="footer">
-    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.23.4 ACCESO DIRECTO</span>
+    <span>PADRON-LAB · Herramienta para planificación, no sustituto de valoración individual. · v2026.07.27.3 ACCESO UNIFICADO</span>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -6735,6 +6736,10 @@
   <script type="module">
     const CLOUD_SETTINGS_KEY = 'padronlab-cloud-settings-v1';
     const INVITE_SETUP_KEY = 'padronlab-pending-athlete-invite-v1';
+    const DEFAULT_CLOUD_SETTINGS = {
+      url: 'https://wcljclcerfrhpjrrhgsj.supabase.co',
+      anonKey: 'sb_publishable_LaTuqyHtXNZTwemnj1ShNA_YA0ZKI2E'
+    };
     const DATA_KEYS = {
       athletes: 'padronlab-athletes-v1',
       plans: 'padronlab-session-plans-v1',
@@ -6752,7 +6757,6 @@
     const accessSubmit = document.getElementById('accessSubmit');
     const accessShowSetup = document.getElementById('accessShowSetup');
     const accessSetup = document.getElementById('accessSetup');
-    let requestedAccessRole = 'trainer';
     let supabaseClient = null;
     let supabaseModule = null;
     let supabaseLoadPromise = null;
@@ -6785,7 +6789,8 @@
     })();
 
     function cloudSettings() {
-      try { return JSON.parse(localStorage.getItem(CLOUD_SETTINGS_KEY) || 'null') || {}; } catch (error) { return {}; }
+      localStorage.setItem(CLOUD_SETTINGS_KEY, JSON.stringify(DEFAULT_CLOUD_SETTINGS));
+      return DEFAULT_CLOUD_SETTINGS;
     }
 
     function cloudMessage(message, isError) {
@@ -6795,11 +6800,14 @@
     }
 
     function setAccessState(state, message, isError) {
-      document.body.dataset.authState = 'signed-in';
+      const normalizedState = state === 'signed-in' ? 'signed-in' : (state === 'checking' ? 'checking' : 'signed-out');
+      document.body.dataset.authState = normalizedState;
+      accessGate.hidden = normalizedState === 'signed-in';
+      accessGate.setAttribute('aria-hidden', normalizedState === 'signed-in' ? 'true' : 'false');
       if (message) accessState.textContent = message;
       accessState.dataset.state = isError ? 'error' : '';
-      accessSubmit.disabled = state === 'checking';
-      accessSubmit.setAttribute('aria-busy', state === 'checking' ? 'true' : 'false');
+      accessSubmit.disabled = normalizedState === 'checking';
+      accessSubmit.setAttribute('aria-busy', normalizedState === 'checking' ? 'true' : 'false');
       const settings = cloudSettings();
       accessShowSetup.hidden = Boolean(settings.url && settings.anonKey);
       document.getElementById('accessProjectUrl').value = settings.url || '';
@@ -6944,17 +6952,54 @@
       const pending = pendingAthleteInvite();
       const metadata = cloudSession && cloudSession.user ? cloudSession.user.user_metadata || {} : {};
       const claimCode = pending && pending.claimCode ? pending.claimCode : metadata.claim_code;
-      if (!claimCode || !cloudSession || !cloudProfile || cloudProfile.role !== 'athlete') return false;
+      if (!cloudSession || !cloudProfile || cloudProfile.role !== 'athlete') return false;
       const current = await supabaseClient.from('athletes').select('id').eq('user_id', cloudSession.user.id).maybeSingle();
       if (current.error) throw current.error;
       if (current.data) return true;
-      const claim = await supabaseClient.rpc('claim_athlete_profile', { p_code: claimCode });
-      if (claim.error) throw claim.error;
-      return true;
+      if (claimCode) {
+        const claim = await supabaseClient.rpc('claim_athlete_profile', { p_code: claimCode });
+        if (!claim.error) return true;
+      }
+
+      const identityEmail = String(cloudSession.user.email || '').trim().toLowerCase();
+      const identityAthleteId = metadata.athlete_id || '';
+      let candidate = null;
+      if (identityAthleteId) {
+        const byId = await supabaseClient.from('athletes').select('id, user_id, payload').eq('id', identityAthleteId).maybeSingle();
+        if (!byId.error) candidate = byId.data;
+      }
+      if (!candidate && identityEmail) {
+        const byEmail = await supabaseClient.from('athletes').select('id, user_id, payload').ilike('email', identityEmail).maybeSingle();
+        if (!byEmail.error) candidate = byEmail.data;
+      }
+      if (!candidate) return false;
+      if (candidate.user_id && candidate.user_id !== cloudSession.user.id) {
+        throw new Error('Este perfil de deportista ya está vinculado a otra cuenta.');
+      }
+      const updatedPayload = Object.assign({}, candidate.payload || {}, {
+        id: candidate.id,
+        userId: cloudSession.user.id,
+        email: identityEmail || (candidate.payload && candidate.payload.email) || ''
+      });
+      const link = await supabaseClient.from('athletes')
+        .update({ user_id: cloudSession.user.id, payload: updatedPayload, updated_at: new Date().toISOString() })
+        .eq('id', candidate.id)
+        .select('id')
+        .maybeSingle();
+      if (link.error) throw link.error;
+      return Boolean(link.data);
     }
 
     function showPasswordSetupIfNeeded() {
-      if (cloudSession && cloudProfile && cloudProfile.role === 'athlete') clearAthleteInviteSetup();
+      if (!cloudSession || !cloudProfile || cloudProfile.role !== 'athlete') return;
+      const url = new URL(window.location.href);
+      const isFirstAccess = Boolean(pendingAthleteInvite()) || url.searchParams.get('padronInvite') === 'athlete';
+      const isPasswordReset = url.searchParams.get('padronReset') === '1';
+      if ((isFirstAccess || isPasswordReset) && !athletePasswordSetupCompleted()) {
+        if (!passwordSetupDialog.open) passwordSetupDialog.showModal();
+        return;
+      }
+      clearAthleteInviteSetup();
     }
 
     function rowPayload(row) {
@@ -7031,7 +7076,7 @@
       }
       if (!athleteResult.data) {
         linkedAthlete = null;
-        throw new Error('Tu cuenta está activa, pero todavía no está vinculada a un perfil. Abre una vez el correo de invitación enviado por tu entrenador y vuelve a entrar.');
+        throw new Error('Tu cuenta está activa, pero no se encontró un perfil con el mismo correo. Pide al entrenador que compruebe el correo del deportista y reenvíe la invitación.');
       }
       linkedAthlete = athleteResult.data;
       const [plansResult, recordsResult, workspaceResult] = await Promise.all([
@@ -7146,6 +7191,14 @@
       }
       setCloudBadge('Guardando…', 'saving');
       await syncTrainerData();
+      const expectedPlanIds = localArray(DATA_KEYS.plans).map(function (plan) { return plan.id; });
+      if (expectedPlanIds.length) {
+        const verification = await supabaseClient.from('plans').select('id').eq('coach_id', cloudSession.user.id).in('id', expectedPlanIds);
+        if (verification.error) throw verification.error;
+        const confirmedIds = new Set((verification.data || []).map(function (row) { return row.id; }));
+        const missingPlan = expectedPlanIds.find(function (id) { return !confirmedIds.has(id); });
+        if (missingPlan) throw new Error('La sesión se guardó localmente, pero no quedó confirmada en la nube.');
+      }
       setCloudBadge('Sincronizado', 'synced');
       cloudMessage('Sesión enviada y sincronizada correctamente.');
       return true;
@@ -7157,7 +7210,7 @@
       document.getElementById('cloudAnonKey').value = settings.anonKey || '';
       if (!settings.url || !settings.anonKey) {
         setCloudBadge('Modo local', 'local');
-        setAccessState('signed-in', 'Modo local activo. Configura la conexión desde el indicador de sincronización.');
+        setAccessState('signed-out', 'No se pudo preparar la conexión. Recarga la página e inténtalo de nuevo.', true);
         return;
       }
       try {
@@ -7169,8 +7222,8 @@
         cloudSession = sessionResult.data.session;
         if (!cloudSession) {
           setCloudBadge('Sin conexión', 'offline');
-          cloudMessage('Proyecto conectado, pero la sincronización necesita reconectarse desde Configuración.');
-          setAccessState('signed-in', 'Aplicación abierta en modo local.');
+          cloudMessage('Proyecto conectado. Inicia sesión para cargar tus datos.');
+          setAccessState('signed-out', 'Introduce tu correo y contraseña. PADRON-LAB abrirá automáticamente tu espacio.');
           return;
         }
         await fetchCloudProfile();
@@ -7182,27 +7235,9 @@
       } catch (error) {
         setCloudBadge('Error de sincronización', 'error');
         cloudMessage(error.message, true);
-        setAccessState('signed-in', error.message, true);
+        setAccessState('signed-out', error.message, true);
       }
     }
-
-    document.querySelectorAll('[data-access-role]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        requestedAccessRole = button.dataset.accessRole;
-        document.querySelectorAll('[data-access-role]').forEach(function (item) {
-          item.setAttribute('aria-selected', item === button ? 'true' : 'false');
-        });
-        document.getElementById('accessHelp').textContent = requestedAccessRole === 'athlete'
-          ? 'Si todavía no has creado tu contraseña, abre primero el correo de invitación enviado por tu entrenador.'
-          : 'Utiliza la cuenta de entrenador con la que registraste y planificaste a tus deportistas.';
-        const hasSettings = Boolean(cloudSettings().url && cloudSettings().anonKey);
-        accessShowSetup.hidden = requestedAccessRole === 'athlete' || hasSettings;
-        if (requestedAccessRole === 'athlete' && !hasSettings) {
-          setAccessState('signed-out', 'Abre el enlace de acceso compartido por tu entrenador para conectar tu cuenta.', true);
-          accessShowSetup.hidden = true;
-        }
-      });
-    });
 
     document.getElementById('accessLoginForm').addEventListener('submit', async function (event) {
       event.preventDefault();
@@ -7220,14 +7255,6 @@
         cloudSession = result.data.session;
         await fetchCloudProfile();
         if (!cloudProfile) throw new Error('No se encontró el perfil de acceso de esta cuenta.');
-        if (cloudProfile.role !== requestedAccessRole) {
-          await supabaseClient.auth.signOut();
-          cloudSession = null;
-          cloudProfile = null;
-          throw new Error(requestedAccessRole === 'athlete'
-            ? 'Esta cuenta pertenece al entrenador. Selecciona “Soy entrenador”.'
-            : 'Esta cuenta pertenece a un deportista. Selecciona “Soy deportista”.');
-        }
         if (cloudProfile.role === 'athlete') await claimPendingAthleteInvite();
         subscribeRealtime();
         await hydrateCloud();
@@ -7246,11 +7273,8 @@
       try {
         setAccessState('checking', 'Enviando el correo para recuperar tu contraseña…');
         await loadSupabase();
-        const settings = cloudSettings();
         const redirect = new URL(window.location.origin + window.location.pathname);
         redirect.searchParams.set('padronReset', '1');
-        redirect.searchParams.set('cloudUrl', settings.url);
-        redirect.searchParams.set('cloudKey', settings.anonKey);
         const result = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: redirect.toString() });
         if (result.error) throw result.error;
         setAccessState('signed-out', 'Correo enviado. Abre el enlace recibido para elegir una nueva contraseña.');
